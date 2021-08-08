@@ -38,6 +38,13 @@ configure_file(
     @ONLY
 )
 
+# withou @ONLY ${workspaceFolder} is replaced
+configure_file(
+    vscode_in/tasks.json.in
+    ${CMAKE_BINARY_DIR}/.vscode/tasks.json
+    @ONLY
+)
+
 configure_file(
     vscode_in/workspace.code-workspace
     ${CMAKE_BINARY_DIR}/workspace.code-workspace

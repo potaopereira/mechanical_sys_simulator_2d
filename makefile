@@ -1,28 +1,56 @@
 IMAGE=rigid_bodies_2d_img
+CONTAINER=rigid_bodies_2d_cnt
+BUILD=build
 
-all: run
+all: start
 
-run: .build
+start: .create $(BUILD)
+	docker start $(CONTAINER)
 	docker \
-	run \
-	--rm \
+	exec \
 	-it \
-	-v "$(PWD)"/project:/home/$(shell id -nu)/project \
-	-w /home/$(shell id -nu)/project \
-	$(IMAGE) \
-	/bin/bash -c " \
-	mkdir -p build && cd build && cmake ../project && make \
+	$(CONTAINER) \
+	/bin/zsh -c " \
+	cd project/project/$(BUILD) \
+	&& \
+	pwd \
 	"
 
-inspect: .build
+inspect: .create
+	docker start $(CONTAINER)
 	docker \
-	run \
-	--rm \
+	exec \
 	-it \
-	-v "$(PWD)"/project:/home/$(shell id -nu)/project \
-	-w /home/$(shell id -nu)/project \
-	$(IMAGE) \
-	/bin/bash
+	$(CONTAINER) \
+	/bin/zsh
+
+$(BUILD):
+	docker start $(CONTAINER)
+	docker \
+	exec \
+	-it \
+	$(CONTAINER) \
+	/bin/zsh -c " \
+	cd project/project \
+	&& \
+	mkdir -p $@ \
+	&& \
+	cd $@ \
+	&& \
+	cmake ../project \
+	&& \
+	make \
+	"
+
+.create: .build
+	xhost +local:docker
+	docker create \
+	-it \
+	--name $(CONTAINER) \
+	-v "$(PWD)":/home/$(shell id -nu)/project \
+	-v /tmp/.X11-unix/:/tmp/.X11-unix \
+	$(IMAGE)
+	touch $@
 
 .build: dockerfile.df
 	docker build \

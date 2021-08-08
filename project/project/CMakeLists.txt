@@ -19,6 +19,8 @@ function(add_launch_json _name _program _args _cwd)
     set_property(GLOBAL APPEND PROPERTY _LAUNCHS launch_${name}.json)
 endfunction()
 
+add_subdirectory(rb2d)
+
 
 get_property(LAUNCHS GLOBAL PROPERTY _LAUNCHS)
 message("Launchs = " ${LAUNCHS})

@@ -46,6 +46,7 @@ target_link_libraries(${PROJECT_APPLICATION_NAME}
     Qt5::Gui
     Qt5::Widgets
     MSInterface
+    yaml-cpp
     ExampleMS
 )
 

@@ -61,3 +61,9 @@ add_launch_json(
     # _cwd
     "${CMAKE_CURRENT_BINARY_DIR}"
 )
+
+configure_file(
+    config/config.yaml
+    ${CMAKE_CURRENT_BINARY_DIR}/config.yaml
+    @ONLY
+)

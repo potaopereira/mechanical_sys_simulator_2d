@@ -17,6 +17,12 @@
 
 #include <math.h>
 
+// std::ofstream
+#include <fstream>
+
+// std::cout, std::endl
+#include <iostream>
+
 SingleRBViewView::SingleRBViewView(
     QObject * parent = 0
 ):
@@ -601,6 +607,8 @@ MainWindow::MainWindow(
 ):
 QMainWindow(parent)
 ,
+mNode(getConfig())
+,
 mAddMS()
 ,
 mRBViewView()
@@ -643,8 +651,23 @@ mRBViewView()
     setCentralWidget(&mRBViewView);
 }
 
+YAML::Node
+MainWindow::getConfig(){
+    try{
+        YAML::Node node = YAML::LoadFile("config_tmp.yaml");
+        return node;
+    }
+    catch(...){
+        std::cout << "Using default config." << std::endl;
+        return YAML::LoadFile("config.yaml");
+    }
+    
+}
+
 MainWindow::~MainWindow()
 {
+    std::ofstream config_file("config_tmp.yaml");
+    config_file << mNode;
 }
 
 void

@@ -91,6 +91,8 @@
 // RBViewRectangle
 // #include <view/combined.hpp>
 
+#include <yaml-cpp/yaml.h>
+
 class SingleRBViewView: public QObject
 {
     Q_OBJECT
@@ -318,7 +320,9 @@ public QMainWindow
     Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent = 0);
+    MainWindow(
+        QWidget *parent = 0
+    );
     ~MainWindow();
 
 public slots:
@@ -330,8 +334,12 @@ private slots:
     void newFile(bool);
 
 private:
+    YAML::Node mNode;
     AddMS mAddMS;
     RBViewView mRBViewView;
     QMenuBar mQMenuBar;
+
+    static
+    YAML::Node getConfig();
 };
 

@@ -1,5 +1,8 @@
 set(PROJECT_NAME SymbolicCpp)
 
+# several "-Werror=deprecated-copy" that I did not want to fix
+# add_compile_options(-Wall -Wextra -pedantic -Werror)
+
 set(
     SRCS
     SymbolicC++3-3.35-vc/src/array.cpp

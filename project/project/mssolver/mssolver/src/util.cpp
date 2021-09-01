@@ -313,7 +313,10 @@ pc_slope(
     ,
     std::vector<Symbolic> const & parameters
 ){
-    if(parameters.size()==4){
+    if(parameters.size()!=4){
+        throw std::invalid_argument("Slope requires 4 parameters: a point and a non-zero direction.");
+    }
+    else{
         Symbolic x1 = parameters[0];
         Symbolic x0 = parameters[1];
         Symbolic n0  = parameters[2];
@@ -331,7 +334,10 @@ hc_slope(
     ,
     std::vector<Symbolic> const & parameters
 ){
-    if(rigid_bodies.size()==1){
+    if(parameters.size()!=1){
+        throw std::invalid_argument("Slope constraint applies to a single rigid body.");
+    }
+    else{
         p_t p = getP(rigid_bodies[0]);
         lp_t lp = p.lp;
         return pc_slope(lp, parameters);
@@ -344,7 +350,10 @@ pc_parabola(
     ,
     std::vector<Symbolic> const & parameters
 ){
-    if(parameters.size()==3){
+    if(parameters.size()!=3){
+        throw std::invalid_argument("Parabola requires 3 parameters.");
+    }
+    else{
         Symbolic x1 = parameters[0];
         Symbolic x0 = parameters[1];
         Symbolic a  = parameters[2];
@@ -358,10 +367,10 @@ hc_parabola(
     ,
     std::vector<Symbolic> const & parameters
 ){
-    if(rigid_bodies.size()==1){
-        Symbolic x1 = parameters[0];
-        Symbolic x0 = parameters[1];
-        Symbolic a  = parameters[2];
+    if(parameters.size()!=1){
+        throw std::invalid_argument("Slope constraint applies to a single rigid body.");
+    }
+    else{
         p_t p = getP(rigid_bodies[0]);
         lp_t lp = p.lp;
         return pc_parabola(lp, parameters);
@@ -374,7 +383,10 @@ pc_ellipse(
     ,
     std::vector<Symbolic> const & parameters
 ){
-    if(parameters.size()==4){
+    if(parameters.size()!=4){
+        throw std::invalid_argument("Ellipse requires 4 parameters: a center point and two axis' lengths.");
+    }
+    else{
         Symbolic x0 = parameters[0];
         Symbolic x1 = parameters[1];
         Symbolic a0 = parameters[2];
@@ -389,7 +401,10 @@ hc_ellipse(
     ,
     std::vector<Symbolic> const & parameters
 ){
-    if(rigid_bodies.size()==1){
+    if(parameters.size()!=1){
+        throw std::invalid_argument("Ellipse constraint applies to a single rigid body.");
+    }
+    else{
         p_t p = getP(rigid_bodies[0]);
         lp_t lp = p.lp;
         return pc_ellipse(lp, parameters);;

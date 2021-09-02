@@ -1,10 +1,18 @@
 #pragma once
 
-#include <private/colorbutton.h>
+// ColorButton
+#include "private/colorbutton.h"
+
 // QGridLayout
 #include <QGridLayout>
+
+// QVBoxLayout
 #include <QVBoxLayout>
+
+// QLineEdit
 #include <QLineEdit>
+
+// QLineEdit
 #include <QCheckBox>
 
 // IMS2D

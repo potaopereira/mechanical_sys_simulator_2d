@@ -12,6 +12,9 @@ set(SRC_FILES
     src/mechanical_system_options.cpp
     src/addMS.cpp
     src/global_options.cpp
+    src/timer_slider.cpp
+    src/solver.cpp
+    src/multiple_ms_view.cpp
 
 )
 
@@ -21,6 +24,9 @@ set(HEADER_FILES
     include/private/mechanical_system_options.h
     include/private/addMS.h
     include/private/global_options.h
+    include/private/timer_slider.h
+    include/private/solver.h
+    include/private/multiple_ms_view.h
 )
 
 add_executable(

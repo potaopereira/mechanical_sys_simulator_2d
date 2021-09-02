@@ -17,6 +17,8 @@
 #include <QLineEdit>
 // QPushButton 
 #include <QPushButton>
+// YAML::Node
+#include <yaml-cpp/yaml.h>
 
 class GlobalOptionFloat:
 public QWidget
@@ -80,6 +82,7 @@ public:
     }
 
     GlobalOptions(
+        YAML::Node const & node,
         QWidget *parent = nullptr
     );
 
@@ -92,9 +95,20 @@ signals:
     );
 
 private:
+    YAML::Node mNode;
     QPushButton mSolve;
     GlobalOptionFloat mInitialTime;
     GlobalOptionFloat mFinalTime;
     GlobalOptionFloat mDeltaTime;
     QVBoxLayout mLayout;
+
+    // should be made static
+    template<typename T>
+    T
+    getWDefault(
+        YAML::Node const & node
+    ){
+        return node["value"].as<T, T>(node["default"].as<T>());
+        // return node["value"].as<T>();
+    }
 };

@@ -73,9 +73,12 @@ GlobalOptionInt::getValue(
 }
 
 GlobalOptions::GlobalOptions(
+    YAML::Node const & node,
     QWidget * parent
 ):
 QWidget(parent)
+,
+mNode(node)
 ,
 mSolve(QString("Solve"))
 ,
@@ -83,7 +86,7 @@ mInitialTime(
     std::string("Initial time"),
     0, // min
     100, // max
-    0, // initial
+    getWDefault<float>(mNode["initial_time"]), // initial
     std::string("Initial time instant in seconds")
 )
 ,
@@ -91,7 +94,7 @@ mFinalTime(
     std::string("End time"),
     0, // min
     100, // max
-    1, // initial
+    getWDefault<float>(mNode["final_time"]), // initial
     std::string("Final time instant in seconds")
 )
 ,
@@ -99,7 +102,7 @@ mDeltaTime(
     std::string("Time step"),
     0.0001, // min
     1, // max
-    0.01, // initial
+    getWDefault<float>(mNode["delta_time"]), // initial
     std::string("Time steps in seconds, when computing solution")
 )
 {

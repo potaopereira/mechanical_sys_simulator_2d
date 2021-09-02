@@ -131,8 +131,14 @@ MultipleMSView::~MultipleMSView()
     //     delete std::get<2>(mList[0]);
     //     mList.erase(mList.begin());
     // }
+    std::cout << "Deleting multiple mechanical system view object." << std::endl;
+}
 
-    std::cout << "Deleting rigid body view object." << std::endl;
+
+YAML::Node
+MultipleMSView::getNode() {
+    mNode["GlobalOptions"] = mGlobalOptions->getNode();
+    return mNode;
 }
 
 void

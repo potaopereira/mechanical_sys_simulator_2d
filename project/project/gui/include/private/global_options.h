@@ -86,6 +86,11 @@ public:
         QWidget *parent = nullptr
     );
 
+    // virtual
+    // ~GlobalOptions();
+
+    YAML::Node getNode();
+
 public slots:
     void requestSolver();
 

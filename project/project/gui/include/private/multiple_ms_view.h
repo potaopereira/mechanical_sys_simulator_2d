@@ -81,9 +81,7 @@ public:
         IMS2D*
     );
 
-    YAML::Node getNode() const {
-        return mNode;
-    }
+    YAML::Node getNode();
 
 private slots:
     void changeTime(

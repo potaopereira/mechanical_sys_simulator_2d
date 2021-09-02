@@ -2,6 +2,8 @@
 
 #include <QString>
 
+#include <iostream>
+
 GlobalOptionFloat::GlobalOptionFloat(
     std::string label,
     float min,
@@ -118,6 +120,16 @@ mDeltaTime(
     );
 }
 
+YAML::Node
+GlobalOptions::getNode(){
+
+    mNode["initial_time"]["value"] = mInitialTime.getValue();
+    mNode["final_time"]["value"] = mFinalTime.getValue();
+    mNode["delta_time"]["value"] = mDeltaTime.getValue();
+
+    return mNode;
+}
+
 void
 GlobalOptions::requestSolver(
 
@@ -125,6 +137,11 @@ GlobalOptions::requestSolver(
     float t0 = mInitialTime.getValue();
     float t1 = mFinalTime.getValue();
     float dt = mDeltaTime.getValue();
+
+    mNode["initial_time"]["value"] = t0;
+    mNode["final_time"]["value"] = t1;
+    mNode["delta_time"]["value"] = dt;
+
     if(t1 > t0){
         int unsigned steps = (t1 - t0)/dt;
         // if steps = 0, then we just look at initial condition

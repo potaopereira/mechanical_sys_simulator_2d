@@ -59,8 +59,8 @@ mMultipleMSView(mNode["MultipleMSView"])
 YAML::Node
 MainWindow::getConfig(){
     try{
-        // YAML::Node node = YAML::LoadFile("config_tmp.yaml");
-        YAML::Node node = YAML::LoadFile("config.yaml");
+        YAML::Node node = YAML::LoadFile("config_tmp.yaml");
+        // YAML::Node node = YAML::LoadFile("config.yaml");
         return node;
     }
     catch(...){
@@ -72,6 +72,8 @@ MainWindow::getConfig(){
 
 MainWindow::~MainWindow()
 {
+    mNode["MultipleMSView"] = mMultipleMSView.getNode();
+
     std::ofstream config_file("config_tmp.yaml");
     config_file << mNode;
 }

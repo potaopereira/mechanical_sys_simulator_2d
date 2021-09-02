@@ -41,6 +41,16 @@ public:
         mViewer->showAtStep(step);
     }
 
+    std::string getName() const {
+        return mSolver->getName();
+    }
+
+    std::string getName(
+        int N // rigid body number
+    ) const {
+        return mSolver->getName(N);
+    }
+
     int solve(
         double time_initial,
         double time_step,
@@ -54,6 +64,33 @@ public:
             current_step
         );
     }
+
+    double getLinearInertia(
+        int N // rigid body number
+    ) const{
+        return mSolver->getLinearInertia(N);
+    };
+
+    void setLinearInertia(
+        double mass,
+        int N // rigid body number
+    ){
+        mSolver->setLinearInertia(mass, N);
+    }
+
+    double getAngularInertia(
+        int N // rigid body number
+    ) const {
+        return mSolver->getAngularInertia(N);
+    }
+
+    void setAngularInertia(
+        double moment_of_inertia,
+        int N // rigid body number
+    ){
+        mSolver->setAngularInertia(moment_of_inertia, N);
+    }
+
 
     int dimRigidBodies(){
         return mSolver->dimRigidBodies();

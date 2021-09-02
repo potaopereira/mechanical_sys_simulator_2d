@@ -170,7 +170,7 @@ MultipleMSView::addMS(
         std::make_tuple(ptr, scroll, options)
     );
     scroll->setWidget(options);
-    mQTabWidget.addTab(scroll, QString("a"));
+    mQTabWidget.addTab(scroll, QString(ptr->getName().c_str()));
 
     mQGraphicsScene.addItem(ptr->getView());
 

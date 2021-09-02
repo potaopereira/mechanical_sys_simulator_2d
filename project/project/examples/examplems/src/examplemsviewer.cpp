@@ -33,8 +33,8 @@ IMS2D(this, this, this)
 
     p0 <<  getParam("parameter1")*cos(M_PI/4), getParam("parameter2")*sin(M_PI/4), cos(M_PI/4), -sin(M_PI/4), sin(M_PI/4), cos(M_PI/4);
     q0 << -getParam("parameter1"), 0;
-    v0 << 0.5, -0.5, 1;
-    // v0 << 0, 0, 0;
+    // v0 << 0.5, -0.5, 1;
+    v0 << 0, 0, 0;
 
 }
 

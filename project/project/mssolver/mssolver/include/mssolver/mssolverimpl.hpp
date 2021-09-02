@@ -3,30 +3,33 @@
 // std::array
 #include  <array>
 
+// std::string
 #include <string>
 
+// eigen for matrix vector operations
 #include <Eigen/Dense>
 
+// gsl for solving differential equations
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_odeiv2.h>
 
-
+// gsl for minimization
 #include <gsl/gsl_multimin.h>
 
+// to get utilitarian functions
 #include "mssolver/util.hpp"
 
 // IMS2DSolver
 #include "msinterface/solver.hpp"
 
 /**
- * @brief system is a (3*N + 2*M2 - (M1 + 3*M2))-th dimensional system
+ * @brief Mechanical system is a (3*N - (M1 + M2 + M3))-th dimensional system
  * 
- * 3*N + M1 - M2
- * 
- * @tparam N number of rigid bodies
- * @tparam m number of constraints
- * @tparam p number of auxiliary variables
+ * @tparam N number of mechanical systems
+ * @tparam M1 number of holonomic constraints
+ * @tparam M2 number of contact contraints
+ * @tparam M3 number of non-sliding contact contraints
  */
 template<int N, int M1, int M2, int M3>
 class MS2DSolverImpl:
@@ -37,22 +40,85 @@ public:
     // static const int d = N;
     MS2DSolverImpl(
         IMSConstraints<N, M1, M2, M3>* ptr
-        // ,
-        // std::array<std::pair<, N> inertias
-    )
+        ,
+        std::array<rbi_t, N> inertias
+        ,
+        std::string name
+        ,
+        std::array<std::string, N> rigid_body_names
+    ):
+    mName(name)
+    ,
+    mRBNames(rigid_body_names)
+    ,
+    mI(Eigen::Matrix<double, 3*N, 3*N>::Zero())
+    ,
+    mIinv(Eigen::Matrix<double, 3*N, 3*N>::Zero())
     {
         mListWithContact = ptr->getListOrderedWithContact();
 
         for(int i = 0; i < N; ++i){
-            Eigen::Matrix<double, 3, 3> m;
-            m << 
-                1, 0, 0,
-                0, 1, 0,
-                0, 0, 1;
-            mIinv.block(3*i, 3*i, 3, 3) = m;
-            mI.block(3*i, 3*i, 3, 3) = m;
+            setLinearInertia(inertias[i][0], i);
+            setAngularInertia(inertias[i][1], i);
         }
 
+    }
+
+    std::string getName() const {
+        return mName;
+    }
+
+    std::string getName(
+        int i // rigid body number
+    ) const {
+        return mRBNames[i];
+    }
+
+    virtual
+    double getLinearInertia(
+        int i // rigid body number
+    ) const {
+        return mI(3*i, 3*i);
+    }
+
+    virtual
+    void setLinearInertia(
+        double mass,
+        int i // rigid body number
+    ){
+        mI(3*i + 0, 3*i + 0) = mass;
+        mI(3*i + 1, 3*i + 1) = mass;
+
+        mIinv(3*i + 0, 3*i + 0) = 1./mass;
+        mIinv(3*i + 1, 3*i + 1) = 1./mass;
+
+        // Eigen::Matrix<double, 2, 2> m;
+        // m << 
+        //     mass, 0,
+        //     0, mass;
+        // mI.block(3*i, 3*i, 2, 2) = m;
+
+        // Eigen::Matrix<double, 2, 2> minv;
+        // minv << 
+        //     1./mass, 0,
+        //     0, 1./mass;
+        // mI.block(3*i, 3*i, 2, 2) = minv;
+    }
+
+    virtual
+    double getAngularInertia(
+        int i // rigid body number
+    ) const {
+        return mI(3*i + 2, 3*i + 2);
+    }
+
+    virtual
+    void setAngularInertia(
+        double moment_of_inertia,
+        int i // rigid body number
+    ) {
+        mI(3*i + 2, 3*i + 2) = moment_of_inertia;
+        mIinv(3*i + 2, 3*i + 2) = 1./moment_of_inertia;
     }
 
     Eigen::Matrix<double, 2+4, 1> VelocityddtP(
@@ -228,7 +294,7 @@ public:
             {{
                 solution[6*N + 2*M2 + 3*k + 0],
                 solution[6*N + 2*M2 + 3*k + 1],
-                solution[6*N + 2*M2 + 3*k + 2]
+                180/M_PI*solution[6*N + 2*M2 + 3*k + 2] // radians to degrees
             }}
         );
     }
@@ -242,7 +308,7 @@ public:
             {{
                 solution[6*N + 2*M2 + 3*N + 3*k + 0],
                 solution[6*N + 2*M2 + 3*N + 3*k + 1],
-                solution[6*N + 2*M2 + 3*N + 3*k + 2]
+                180/M_PI*solution[6*N + 2*M2 + 3*N + 3*k + 2] // radians to degrees
             }}
         );
     }
@@ -506,7 +572,7 @@ public:
         v_t const & v
     ){
         f_t f = f_t::Zero();
-        f << 0, -1, 0;
+        f << 0, -10, 0; // kg / s / s
         return f;
     }
 
@@ -1338,6 +1404,12 @@ private:
      * 
      */
     std::string mName;
+
+    /**
+     * @brief Rigid body names
+     * 
+     */
+    std::array<std::string, N> mRBNames;
 
     /* inertia matrix */
     Eigen::Matrix<double, 3*N, 3*N> mI;

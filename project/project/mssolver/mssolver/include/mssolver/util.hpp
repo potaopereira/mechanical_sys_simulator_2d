@@ -1,11 +1,13 @@
 #pragma once
 
+// std::vector
+#include <vector>
+
 // std::array
 #include  <array>
 
+// for symbolic operations
 #include <symbolicc++.h>
-
-#include <vector>
 
 namespace sop {
 

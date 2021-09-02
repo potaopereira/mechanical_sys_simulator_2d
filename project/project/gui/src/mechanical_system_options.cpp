@@ -15,32 +15,57 @@ mIMS2D(ms)
 mBodyId(bodyId)
 ,
 mQGridLayout()
-// ,
-// mPosition()
 {
     connect(
         &mShowBoundary, &QCheckBox::pressed,
         this, &RBOptions::showBoundary
     );
 
-    mQGridLayout.addWidget(new QLabel((std::string("i")+std::to_string(bodyId)).c_str()), 0, 0);
+    mQGridLayout.addWidget(new QLabel( ms->getName(mBodyId).c_str()), 0, 0);
 
     int k = 1;
+    mQGridLayout.addWidget(new QLabel("inertias"), k, 1);
+    mInertia[0].setToolTip("mass kg");
+    mInertia[0].setText(QString::number(ms->getLinearInertia(mBodyId), 'g', 3));
+    mQGridLayout.addWidget(&mInertia[0], k, 2);
+    mInertia[1].setToolTip("moment of inertia kg / mm / mm");
+    mInertia[1].setText(QString::number(ms->getAngularInertia(mBodyId), 'g', 3));
+    mQGridLayout.addWidget(&mInertia[1], k, 3);
+    // mQGridLayout.addWidget(&mInertia[2], k, 4);
+    connect(
+        &mInertia[0], &QLineEdit::returnPressed,
+        this, &RBOptions::changeLinearInertia
+    );
+    connect(
+        &mInertia[1], &QLineEdit::returnPressed,
+        this, &RBOptions::changeAngularInertia
+    );
+
+    ++k;
     mQGridLayout.addWidget(new QLabel("position"), k, 1);
+    mPosition[0].setToolTip("linear position x in mm");
     mQGridLayout.addWidget(&mPosition[0], k, 2);
+    mPosition[1].setToolTip("linear position y in mm");
     mQGridLayout.addWidget(&mPosition[1], k, 3);
+    mPosition[2].setToolTip("angular position in degrees");
     mQGridLayout.addWidget(&mPosition[2], k, 4);
 
     ++k;
     mQGridLayout.addWidget(new QLabel("velocity"), k, 1);
+    mVelocity[0].setToolTip("linear velocity x in mm/s");
     mQGridLayout.addWidget(&mVelocity[0], k, 2);
+    mVelocity[1].setToolTip("linear velocity y in mm/s");
     mQGridLayout.addWidget(&mVelocity[1], k, 3);
+    mVelocity[2].setToolTip("angular velocity in degrees/s");
     mQGridLayout.addWidget(&mVelocity[2], k, 4);
 
     ++k;
     mQGridLayout.addWidget(new QLabel("force"), k, 1);
+    mForce[0].setToolTip("linear force x in kg mm / s / s");
     mQGridLayout.addWidget(&mForce[0], k, 2);
+    mForce[1].setToolTip("linear force y in kg mm / s / s");
     mQGridLayout.addWidget(&mForce[1], k, 3);
+    mForce[2].setToolTip("angular force in (kg / mm / mm / s / s) times 180/pi");
     mQGridLayout.addWidget(&mForce[2], k, 4);
 
     ++k;
@@ -141,6 +166,23 @@ RBOptions::ParametersChanged(
 
 }
 
+void
+RBOptions::changeLinearInertia(){
+
+    double mass = mInertia[0].text().toFloat();
+    if(mass>0)
+        mIMS2D->setLinearInertia(mass, mBodyId);
+
+}
+
+void
+RBOptions::changeAngularInertia(){
+
+    double moment_of_inertia = mInertia[1].text().toFloat();
+    if(moment_of_inertia>0)
+        mIMS2D->setAngularInertia(moment_of_inertia, mBodyId);
+
+}
 
 MSOptions::MSOptions(
     IMS2D* ms,

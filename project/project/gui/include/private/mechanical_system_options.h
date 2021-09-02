@@ -58,10 +58,19 @@ public slots:
         // 
     );
 
+    void changeLinearInertia(
+        //
+    );
+
+    void changeAngularInertia(
+        //
+    );
+
 private:
     IMS2D* mIMS2D;
     int mBodyId;
     QGridLayout mQGridLayout;
+    std::array<QLineEdit, 3> mInertia;
     std::array<QLineEdit, 3> mPosition;
     std::array<QLineEdit, 3> mVelocity;
     std::array<QLineEdit, 3> mForce;

@@ -3,6 +3,9 @@
 // std::vector
 #include <vector>
 
+// std::array
+#include <array>
+
 #include <Eigen/Dense>
 
 class IMS2DSolver {
@@ -29,7 +32,11 @@ public:
      * 
      */
     typedef Eigen::Matrix<double, 2, 1> v_t;
-
+    /**
+     * @brief rigid body inertia
+     * 
+     */
+    typedef std::array<double, 2> rbi_t;
 
     /**
      * @brief Construct a new IMRB2D object
@@ -48,12 +55,42 @@ public:
     virtual int dimConstraints() const = 0;
 
     virtual
+    std::string getName() const = 0;
+
+    virtual
+    std::string getName(
+        int N // rigid body number
+    ) const  = 0;
+
+    virtual
     int solverImplementation(
         double time_initial,
         double time_step,
         int steps,
         double** solution,
         int * current_step
+    ) = 0;
+
+    virtual
+    double getLinearInertia(
+        int N // rigid body number
+    ) const = 0;
+
+    virtual
+    void setLinearInertia(
+        double mass,
+        int N // rigid body number
+    ) = 0;
+
+    virtual
+    double getAngularInertia(
+        int N // rigid body number
+    ) const = 0;
+
+    virtual
+    void setAngularInertia(
+        double moment_of_inertia,
+        int N // rigid body number
     ) = 0;
 
     /**************************************************************************/

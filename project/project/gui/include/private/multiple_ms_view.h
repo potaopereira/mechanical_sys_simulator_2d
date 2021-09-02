@@ -1,7 +1,7 @@
 /**
  * @file multiple_ms_view.h
- * @author your name (you@domain.com)
- * @brief widget to visualize several mechanical systems
+ * @author Pedro Pereira (pedro.m.otao.pereira@gmail.com)
+ * @brief Widget to visualize several mechanical systems
  * @version 0.1
  * @date 2021-09-01
  * 

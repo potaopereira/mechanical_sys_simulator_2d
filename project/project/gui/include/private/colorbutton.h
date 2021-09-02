@@ -1,3 +1,14 @@
+/**
+ * @file colorbutton.h
+ * @author Pedro Pereira (pedro.m.otao.pereira@gmail.com)
+ * @brief Menu to select color from a list of available colors
+ * @version 0.1
+ * @date 2021-08-28
+ * 
+ * @copyright Copyright (c) 2021
+ * 
+ */
+
 #pragma once
 
 #include <QMenu>

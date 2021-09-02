@@ -1,3 +1,13 @@
+/**
+ * @file global_options.h
+ * @author Pedro Pereira (pedro.m.otao.pereira@gmail.com)
+ * @brief Widget to set global options
+ * @version 0.1
+ * @date 2021-08-28
+ * 
+ * @copyright Copyright (c) 2021
+ * 
+ */
 
 #pragma once
 

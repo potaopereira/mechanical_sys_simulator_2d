@@ -1,3 +1,14 @@
+/**
+ * @file timer_slider.h
+ * @author Pedro Pereira (pedro.m.otao.pereira@gmail.com)
+ * @brief Custom slider widget (to drag from initial time instant to final time instant)
+ * @version 0.1
+ * @date 2021-09-01
+ * 
+ * @copyright Copyright (c) 2021
+ * 
+ */
+
 #pragma once
 
 #include <QWidget>

@@ -54,7 +54,7 @@ mQPushButtonPrevious(QString("Previous"))
 
     connect(
         &mQSlider, &QSlider::sliderMoved,
-        this, &TimerSlider::sliderMoved
+        this, &TimerSlider::sliderMovedPre
     );
     connect(
         &mQPushButtonNext, &QPushButton::pressed,
@@ -94,7 +94,8 @@ TimerSlider::goNext(
 ){
     int k = mQSlider.value();
     ++k;
-    if(k <= mSteps){
+    // if(k <= mSteps){
+    if(k <= mMaxCurrent){
         mQSlider.setValue(k);
         emit sliderMoved(k);
     }
@@ -128,3 +129,14 @@ TimerSlider::setProgressValue(
     // }
     mQSlider.setEnabled(true);
 }
+
+void
+TimerSlider::sliderMovedPre(
+    int value
+){
+    if(value <= mMaxCurrent){
+        emit sliderMoved(value);
+    }
+}
+
+

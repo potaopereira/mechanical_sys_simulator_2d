@@ -54,6 +54,11 @@ public slots:
     goPrevious(
     );
 
+    void
+    sliderMovedPre(
+        int value
+    );
+
 signals:
     void sliderMoved(
         int value

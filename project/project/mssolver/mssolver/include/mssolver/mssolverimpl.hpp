@@ -24,6 +24,89 @@
 #include "msinterface/solver.hpp"
 
 /**
+ * @brief Exception to be used if predicting the motion of the mechanical system fails at some point
+ * 
+ */
+class SolverException:
+virtual public std::exception {
+public:
+
+    /**
+     * @brief Construct a solver exception
+     * 
+     */
+    SolverException():
+    std::exception(),
+    error_message("Solver exception.")
+    {
+
+    }
+
+    /**
+     * @brief Destroy the Solver Exception object
+     * 
+     */
+    virtual ~SolverException() throw () {}
+
+
+    /**
+     * @brief Provide exception description
+     * 
+     * @return const char* Pointer to error message
+     */
+    virtual
+    const char* what() const throw () {
+       return error_message.c_str();
+    }
+
+private:
+    std::string error_message;
+};
+
+/**
+ * @brief Exception throwned when the matrix d2c(p,q) in R^{2*M2, M1+3*M2+M} is not full rank
+ * 
+ */
+class RankLossException:
+virtual public SolverException {
+public:
+
+    /**
+     * @brief Construct a new Rank Loss Exception object
+     * 
+     */
+    RankLossException():
+    SolverException(),
+    error_message("d2c(p,q) in R^{2*M2, M1+3*M2+M} is not full rank.")
+    {
+
+    }
+
+    /**
+     * @brief Destroy the Rank Loss Exception object
+     * 
+     */
+    virtual ~RankLossException() throw () {}
+
+
+    /**
+     * @brief Provide exception description
+     * 
+     * @return const char* Pointer to error message
+     */
+    virtual
+    const char* what() const throw () {
+       return error_message.c_str();
+    }
+
+private:
+    std::string error_message;
+};
+
+
+// #include <exception>
+
+/**
  * @brief Mechanical system is a (3*N - (M1 + M2 + M3))-th dimensional system
  * 
  * @tparam N number of mechanical systems
@@ -37,7 +120,14 @@ public IMS2DSolver
 {
 public:
 
-    // static const int d = N;
+    /**
+     * @brief Construct a solver for a mechanical system with N rigid bodies
+     * 
+     * @param ptr Pointer to object that holds contraints
+     * @param inertias Inertias (linear and angular) of rigid bodies
+     * @param name Name of mechanical system
+     * @param rigid_body_names Name of each rigid body
+     */
     MS2DSolverImpl(
         IMSConstraints<N, M1, M2, M3>* ptr
         ,
@@ -47,6 +137,8 @@ public:
         ,
         std::array<std::string, N> rigid_body_names
     ):
+    IMS2DSolver()
+    ,
     mName(name)
     ,
     mRBNames(rigid_body_names)
@@ -54,6 +146,8 @@ public:
     mI(Eigen::Matrix<double, 3*N, 3*N>::Zero())
     ,
     mIinv(Eigen::Matrix<double, 3*N, 3*N>::Zero())
+    ,
+    mListWithContact(std::list<int>(0))
     {
         mListWithContact = ptr->getListOrderedWithContact();
 
@@ -64,28 +158,57 @@ public:
 
     }
 
+    /**
+     * @brief Get the name of the mechical system
+     * 
+     * @return std::string name of the mechanical system
+     */
+    virtual
     std::string getName() const {
         return mName;
     }
 
+    /**
+     * @brief Get the name of the ith rigid body
+     * 
+     * @param i rigid body id (between 0 and N)
+     * @return std::string name of the ith rigid body
+     */
+    virtual
     std::string getName(
         int i // rigid body number
     ) const {
+        validateId(i);
         return mRBNames[i];
     }
 
+    /**
+     * @brief Get the mass of the ith rigid body (linear inertia)
+     * 
+     * @param i rigid body id
+     * @return double value of the mass
+     */
     virtual
     double getLinearInertia(
         int i // rigid body number
     ) const {
+        validateId(i);
         return mI(3*i, 3*i);
     }
 
+    /**
+     * @brief Set the mass (the linear inertia) of the ith rigid body
+     * 
+     * @param mass mass value
+     * @param i rigid body id
+     */
     virtual
     void setLinearInertia(
         double mass,
         int i // rigid body number
     ){
+        validateId(i);
+
         mI(3*i + 0, 3*i + 0) = mass;
         mI(3*i + 1, 3*i + 1) = mass;
 
@@ -105,13 +228,26 @@ public:
         // mI.block(3*i, 3*i, 2, 2) = minv;
     }
 
+    /**
+     * @brief Get the moment of inertia of the ith rigid body (angular inertia)
+     * 
+     * @param i rigid body id
+     * @return double value of the moment of inertia
+     */
     virtual
     double getAngularInertia(
         int i // rigid body number
     ) const {
+        validateId(i);
         return mI(3*i + 2, 3*i + 2);
     }
 
+    /**
+     * @brief Set the moment of inertia (the angular inertia) of the ith rigid body
+     * 
+     * @param moment_of_inertia moment of inertia value
+     * @param i rigid body id
+     */
     virtual
     void setAngularInertia(
         double moment_of_inertia,
@@ -121,6 +257,15 @@ public:
         mIinv(3*i + 2, 3*i + 2) = 1./moment_of_inertia;
     }
 
+    /**
+     * @brief Compute time derivative of pose of a rigid body, given its twist
+     * 
+     * @details Pose is composed of a linear and angular components, and twist is also composed of a linear and angular components
+     * 
+     * @param p pose of a rigid body
+     * @param v twist of a rigid body
+     * @return Eigen::Matrix<double, 2+4, 1> 
+     */
     Eigen::Matrix<double, 2+4, 1> VelocityddtP(
         rbp_t const & p
         ,
@@ -145,6 +290,8 @@ public:
         double e2 = p(3)*p(3) + p(5)*p(5) - 1;
         double e3 = p(2)*p(3) + p(4)*p(5);
 
+        // terms on the right side are stability terms
+        // they guarantee a rotation matrix remains a rotation matrix
         ddtp(2) = +v(2)*p(3) - p(2)*e1           - p(3)*e3;
         ddtp(3) = -v(2)*p(2)           - p(3)*e2 - p(2)*e3;
         ddtp(4) = +v(2)*p(5) - p(4)*e1           - p(5)*e3;
@@ -152,8 +299,11 @@ public:
         return ddtp;
     }
 
-
-    virtual int dim() const { return N; }
+    /**
+     * @brief Size of solution when solving differential equation in solverImplementation
+     * 
+     * @return int Size of solution when solving differential equation in solverImplementation
+     */
     virtual int dimSolution() const {
         return 
             6*N  +  // positions
@@ -162,50 +312,49 @@ public:
             2*M2    // contact points
         ;
     }
+
+    /**
+     * @brief Number of rigid bodies
+     * 
+     * @return int Number of rigid bodies
+     */
+    virtual int dim() const {return N;}
+
+    /**
+     * @brief Number of rigid bodies
+     * 
+     * @return int Number of rigid bodies
+     */
     virtual int dimRigidBodies() const {return N;}
+
+    /**
+     * @brief Number of constraints
+     * 
+     * @return int Number of constraints
+     */
     virtual int dimConstraints() const {return M1+M2+M3;}
-    
-    virtual int dimConstr() const {return M1+3*M2+M3;}
-    virtual int dimM1() const {return M1;}
-    virtual int dimM2() const {return M2;}
 
+    /**
+     * @brief Number of contact contraints
+     * 
+     * @return int Number of contact contraints
+     */
+    virtual int dimContactConstraints() const {return M1;}
 
-    // virtual
-    // void show(
-    //     double *solution
-    // ){
+    /**
+     * @brief Number of non sliding contact contraints
+     * 
+     * @return int Number of non sliding contact contraints
+     */
+    virtual int dimNonSlidingContactConstraints() const {return M2;}
 
-    //     c_t _c = get_c(
-    //         p_t(&solution[0])
-    //         ,
-    //         q_t(&solution[6*N])
-    //         );
-
-    //     std::array<std::vector<Eigen::Matrix<double, 2, 1>>, N> inertial;
-    //     std::array<std::vector<Eigen::Matrix<double, 2, 1>>, N> body;
-    //     for(int i = 0; i < N; ++i){
-    //         inertial[i] = std::vector<Eigen::Matrix<double, 2, 1>>({});
-    //         body[i] = std::vector<Eigen::Matrix<double, 2, 1>>({});
-    //     }
-
-    //     for(int i = 0; i < M2; ++i){
-    //         int k = mholonomic_constraint_with_contact[i].rigid_body;
-    //         body[k] = std::vector<Eigen::Matrix<double, 2, 1>>(
-    //             {
-    //                 Eigen::Matrix<double, 2, 1>(&solution[6*N])
-    //             }
-    //         );
-    //     }
-
-    //     mMSView->setPoseAndVectors(
-    //         p_t(&solution[0]),
-    //         100*v_t(&solution[6*N+2*M2]),
-    //         f_t(&solution[6*N+2*M2+3*N]),
-    //         inertial,
-    //         body
-    //     );
-    // }
-
+    /**
+     * @brief Get the position (for plotting purposes) of a rigid body from the mechanical system
+     * 
+     * @param solution Pointer to solution coming from solverImplementation
+     * @param k Rigid body id
+     * @return rbp_t Rigid body position
+     */
     virtual
     rbp_t getPositionPlot(
         double* solution,
@@ -214,6 +363,13 @@ public:
         return rbp_t(&solution[6*k + 0]);
     }
 
+    /**
+     * @brief Get the velocity (for plotting purposes) of a rigid body from the mechanical system
+     * 
+     * @param solution Pointer to solution coming from solverImplementation
+     * @param k Rigid body id
+     * @return rbv_t Rigid body velocity
+     */
     virtual
     rbv_t getVelocityPlot(
         double* solution,
@@ -222,6 +378,13 @@ public:
         return rbv_t(&solution[6*N + 2*M2 + 3*k]);
     }
 
+    /**
+     * @brief Get the force (for plotting purposes) of a rigid body from the mechanical system
+     * 
+     * @param solution Pointer to solution coming from solverImplementation
+     * @param k Rigid body id
+     * @return rbf_t Rigid body force
+     */
     virtual
     rbf_t getForcePlot(
         double* solution,
@@ -230,7 +393,15 @@ public:
         return rbf_t(&solution[6*N + 2*M2 + 3*N + 3*k]);
     }
 
-
+    /**
+     * @brief Get the inertial vectors (for plotting purposes) of a rigid body from the mechanical system
+     * 
+     * @details This method should be overwritten by children if necessary
+     * 
+     * @param solution Pointer to solution coming from solverImplementation
+     * @param k Rigid body id
+     * @return std::vector<IMS2DSolver::v_t> Vector of inertial forces
+     */
     virtual
     std::vector<IMS2DSolver::v_t> getInertialVectorsPlot(
         double* solution,
@@ -239,38 +410,41 @@ public:
         return std::vector<IMS2DSolver::v_t>({});
     }
 
+    /**
+     * @brief Get the body vectors (for plotting purposes) of a rigid body from the mechanical system
+     * 
+     * @details This method should be overwritten by children if necessary
+     * 
+     * @param solution Pointer to solution coming from solverImplementation
+     * @param k Rigid body id
+     * @return std::vector<IMS2DSolver::v_t> Vector of body forces
+     */
     virtual
     std::vector<IMS2DSolver::v_t> getBodyVectorsPlot(
         double* solution,
         int k // rigid body number
     ) const {
 
-        return std::vector<IMS2DSolver::v_t>(
-            {
-                IMS2DSolver::v_t(&solution[6*N + 2*k])
-            }
-        );
-        // for (std::list<int>::iterator it = mListWithContact.begin(); it!=mListWithContact.end(); ++it){
-        //     if(*it==k){
-
-        //     }
-        // }
-
-        
-        // std::list<int>::iterator j_ptr = std::find(std::begin(mListWithContact), std::end(mListWithContact), k);
-        // if(j_ptr==std::end(list)){
-        //     return std::vector<rbv_t>({});
-        // }else{
-        //     int j = *j_ptr;
-        //     return std::vector<rbv_t>(
-        //         {
-        //             rbv_t(&solution[6*N + 2*j])
-        //         }
-        //     );
-        // }
+        std::list<int>::const_iterator j_ptr = std::find(std::begin(mListWithContact), std::end(mListWithContact), k);
+        if(j_ptr==std::end(mListWithContact)){
+            return std::vector<IMS2DSolver::v_t>({});
+        }else{
+            int j = *j_ptr;
+            return std::vector<IMS2DSolver::v_t>(
+                {
+                    IMS2DSolver::v_t(&solution[6*N + 2*j])
+                }
+            );
+        }
     }
 
-
+    /**
+     * @brief Get the position (for diplaying numbers purposes) of rigid body of the mechanical system
+     * 
+     * @param solution Pointer to solution coming from solverImplementation
+     * @param k Rigid body id
+     * @return std::array<double, 3> Linear position + angular position in degrees
+     */
     virtual
     std::array<double, 3> getPosition(
         double* solution,
@@ -285,6 +459,13 @@ public:
         );
     }
 
+    /**
+     * @brief Get the velocity (for diplaying numbers purposes) of rigid body of the mechanical system
+     * 
+     * @param solution Pointer to solution coming from solverImplementation
+     * @param k Rigid body id
+     * @return std::array<double, 3> Linear velocity + angular velocity in degrees per second
+     */
     virtual
     std::array<double, 3> getVelocity(
         double* solution,
@@ -299,6 +480,13 @@ public:
         );
     }
 
+    /**
+     * @brief Get the force (for diplaying numbers purposes) of rigid body of the mechanical system
+     * 
+     * @param solution Pointer to solution coming from solverImplementation
+     * @param k Rigid body id
+     * @return std::array<double, 3> Linear force + angular force in degrees (instead of radians)
+     */
     virtual
     std::array<double, 3> getForce(
         double* solution,
@@ -313,6 +501,13 @@ public:
         );
     }
 
+    /**
+     * @brief Get the position (for diplaying numbers purposes) of a specific point in a rigid body of the mechanical system
+     * 
+     * @param solution Pointer to solution coming from solverImplementation
+     * @param k Rigid body id
+     * @return std::array<double, 2> Position of that point
+     */
     virtual
     std::array<double, 2> getPositionOfPoint(
         double* solution,
@@ -332,6 +527,13 @@ public:
         );
     }
 
+    /**
+     * @brief Get the velocity (for diplaying numbers purposes) of a specific point in a rigid body of the mechanical system
+     * 
+     * @param solution Pointer to solution coming from solverImplementation
+     * @param k Rigid body id
+     * @return std::array<double, 2> Velocity of that point
+     */
     virtual
     std::array<double, 2> getVelocityOfPoint(
         double* solution,
@@ -352,44 +554,140 @@ public:
         );
     }
 
+    /**
+     * @brief Position of the mechanical system
+     * 
+     */
     typedef Eigen::Matrix<double, 6*N, 1> p_t;
+    /**
+     * @brief Time derivative of the position of the mechanical system
+     * 
+     */
     typedef Eigen::Matrix<double, 6*N, 1> ddtp_t;
-
+    /**
+     * @brief Points of contact of the different rigid bodies of the mechanical system
+     * 
+     */
     typedef Eigen::Matrix<double, 2*M2, 1> q_t;
+    /**
+     * @brief Time derivative of the points of contact of the different rigid bodies of the mechanical system
+     * 
+     */
     typedef Eigen::Matrix<double, 2*M2, 1> ddtq_t;
-
+    /**
+     * @brief Velocity of the mechanical system
+     * 
+     */
     typedef Eigen::Matrix<double, 3*N, 1> v_t;
+    /**
+     * @brief Time derivative of the velocity of the mechanical system
+     * 
+     */
     typedef Eigen::Matrix<double, 3*N, 1> ddtv_t;
-
+    /**
+     * @brief State of the mechanical system
+     * 
+     */
     typedef Eigen::Matrix<double, 6*N + 2*M2 + 3*N, 1> state_t;
+    /**
+     * @brief Time derivative of the state of the mechanical system
+     * 
+     */
     typedef Eigen::Matrix<double, 6*N + 2*M2 + 3*N, 1> ddtstate_t;
-
+    /**
+     * @brief Force applied on the mechanical system
+     * 
+     */
     typedef Eigen::Matrix<double, 3*N, 1> f_t;
 
-    typedef Eigen::Matrix<double, M1+3*M2+M3, 3*N> dkc_t;
-
-
-
+    /**
+     * @brief Constraint that defines the mechanical system
+     * 
+     * @details c(p,q)
+     * 
+     */
     typedef Eigen::Matrix<double, M1+3*M2+M3, 1> c_t;
-
-    typedef Eigen::Matrix<double, M1+3*M2 + 3*N, 1> cextra_t;
-    typedef Eigen::Matrix<double, M1+3*M2 + 3*N, 6*N> d1cextra_t;
-    typedef Eigen::Matrix<double, M1+3*M2 + 3*N, 2*M2> d2cextra_t;
-
+    /**
+     * @brief Derivative of the constraints with respect to the position
+     * 
+     * @details d1c(p,q) = d/dp c(p,q)
+     * 
+     */
     typedef Eigen::Matrix<double, M1+3*M2+M3, 6*N> d1c_t;
+    /**
+     * @brief Derivative of the constraints with respect to the position after the position derivative
+     * 
+     * @details d1c(p,q) k(p) where d/dt p = k(p) v
+     * 
+     */
     typedef Eigen::Matrix<double, M1+3*M2+M3, 3*N> d1ck_t;
+    /**
+     * @brief Derivative of the constraints with respect to the contact points
+     * 
+     * @details d2c(p,q) = d/dq c(p,q)
+     * 
+     */
     typedef Eigen::Matrix<double, M1+3*M2+M3, 2*M2> d2c_t;
+    /**
+     * @brief Time derivative of d1c(p,q) k(p)
+     * 
+     * @details d/dt (d1c(p,q) k(p)) =  d/dp (d1c(p,q) k(p)) d/dtp + d/dq (d1c(p,q) k(p)) d/dtq
+     * 
+     */
     typedef Eigen::Matrix<double, M1+3*M2+M3, 1> ddtd1ck_t;
+    /**
+     * @brief Time derivative of d2c(p,q)
+     * 
+     * @details d/dt (d2c(p,q)) =  d/dp (d2c(p,q)) d/dtp + d/dq (d2c(p,q)) d/dtq
+     * 
+     */
     typedef Eigen::Matrix<double, M1+3*M2+M3, 2*M2> ddtd2c_t;
 
+    /**
+     * @brief Constraint that defines the mechanical system + constraints on rotation matrices
+     * 
+     * @details c(p,q) + constrainst on R1 + ... + constrainst on R2, where Ri is the rotation matrix of rigid body i
+     * 
+     */
+    typedef Eigen::Matrix<double, M1+3*M2 + 3*N, 1> cextra_t;
+    /**
+     * @brief Derivative of the constraints+extra with respect to the position
+     * 
+     */
+    typedef Eigen::Matrix<double, M1+3*M2 + 3*N, 6*N> d1cextra_t;
+    /**
+     * @brief Derivative of the constraints+extra with respect to the contact
+     * 
+     */
+    typedef Eigen::Matrix<double, M1+3*M2 + 3*N, 2*M2> d2cextra_t;
+
+    /**
+     * @brief Get the position from the state
+     * 
+     * @param x State
+     * @return p_t Position
+     */
     p_t getP(state_t const & x) {
         return x.segment(0, 6*N);
     }
 
+    /**
+     * @brief Get the velocity from the state
+     * 
+     * @param x State
+     * @return v_t Velocity
+     */
     v_t getV(state_t const & x) {
-        return x.segment(6*N, 3*N);
+        return x.segment(6*N + 2*M2, 3*N);
     }
 
+    /**
+     * @brief Get the position time derivative
+     * 
+     * @param p Mechnical system position
+     * @param v Mechnical system velocity
+     * @return ddtp_t Time derivative of the position
+     */
     ddtp_t
     ddtP(
         p_t const & p
@@ -410,6 +708,12 @@ public:
         return ddtp;
     }
 
+    /**
+     * @brief Get the position time derivative
+     * 
+     * @param x Mechanical system state
+     * @return ddtp_t Time derivative of the position
+     */
     ddtp_t
     ddtP(
         state_t const & x
@@ -417,73 +721,51 @@ public:
         return ddtP(getP(x), getV(x));
     }
 
-    ddtv_t
+    /**
+     * @brief Get the internal forces applied to the mechanical system
+     * 
+     * @param state State of the mechanical system
+     * @return f_t Force
+     */
+    f_t
     getInternalForces(
-        p_t const & p,
-        v_t const & v,
-        f_t const & f
-    ){
-        ddtv_t ddtv;
-
-        // acceleration no constraints
-        ddtv_t free = mIinv*f;
-
-        // Eigen::Matrix<double, M1+3*M2+M3, 3*N> dkc = getdkc(p);
-        // Eigen::Matrix<double, M1+3*M2+M3, 1> d2c = getd2c(p, v);
-
-        // Eigen::Matrix<double, M1+3*M2+M3, M1+3*M2+M3> to_invert;
-        // to_invert = dkc*mIinv*dkc.transpose();
-
-        // ddtv = -dkc.transpose()*to_invert.llt().solve(
-        //     dkc*free
-        //     +
-        //     d2c
-        // );
-
-        return ddtv;
-    }
-
-    ddtv_t
-    getInternalForces(
-        state_t const & x
-    ){
-        return getInternalForces(getP(x), getV(x), getForce(x));
-    }
-
-    ddtv_t
-    ddtV(
-        p_t const & p,
-        v_t const & v,
-        f_t const & f
+        state_t const & state
     ){
 
-        q_t q;
-
-        ddtv_t ddtv;
-
-        // acceleration no constraints
-        ddtv_t free = mIinv*f;
+        p_t p = state.segment(0, 6*N);
+        q_t q = state.segment(6*N, 2*M2);
+        v_t v = state.segment(6*N + 2*M2, 3*N);
 
 
         d1ck_t A = get_d1ck(p, q);
         d2c_t B = get_d2c(p, q);
         Eigen::Matrix<double, 2*M2, M1+3*M2+M3> BT = B.transpose();
-        Eigen::Matrix<double, M1+M2+M3, M1+3*M2+M3> Bker = B.transpose().fullPivLu().kernel();
-        
+        Eigen::Matrix<double, M1+M2+M3, M1+3*M2+M3> Bker;
+        try{
+            Bker = BT.fullPivLu().kernel().transpose();
+        }catch(...){
+            throw RankLossException();
+        }
+
 
         /* 
-            N v = 0
-            where N = (I - B ( B^T B )^-1 B^T) A
-            where B = d2c and A = d1c
+            d1c(p, q) k(p) v + d2c(p, q) q_dot = 0
+
+            let A = d1c(p, q) k(p)
+            let B = d2c(p, q)
+            =>
+            
+            q_dot = - ( B^T B )^-1 B^T A v
+            
+            and
+
+            NS v = 0
+            where NS = (I - B ( B^T B )^-1 B^T) A
         */
-        // Eigen::Matrix<double, 2*M2, 2*M2> inv = (B.transpose()*B).inverse();
-        // Eigen::Matrix<double, m, m> PI_B = Eigen::Matrix<double, m, m>::Identity() - B*inv*BT;
-        // Eigen::Matrix<double, m, 3*N> NS = PI_B*A;
-        // ddtq_t ddtq = - inv*BT*A*v;
 
+        Eigen::Matrix<double, M1+M2+M3, 3*N> NS = Bker*A;
+        ddtp_t p_dot = ddtP(p, v);
         ddtq_t ddtq = - (B.transpose()*B).llt().solve(BT*A*v);
-
-        ddtp_t p_dot;
 
         // ddt(A) v = (dP(A) Pdot + dQ(A) Qdto) v
         Eigen::Matrix<double, M1+3*M2+M3, 1> dA = get_ddtd1ck(p, p_dot, q, ddtq, v);
@@ -491,99 +773,67 @@ public:
         // ddt [B]   = dP(B) Pdot + dQ(B) Qdot
         Eigen::Matrix<double, M1+3*M2+M3, 2*M2> dB = get_ddtd2c(p, p_dot, q, ddtq);
 
-
-        /*
-            d/dt [(I - B ( B^T B )^-1 B^T) A] v
-            =
-            d/dt [(I - B ( B^T B )^-1 B^T)] A v
-            +
-            (I - B ( B^T B )^-1 B^T) d/dt[A] v
-            =
-            (
-                - dB ( B^T B )^-1 B^T
-                - B ( B^T B )^-1 dB^T
-                + B ( B^T B )^-1 (dB^T B + B^T dB) ( B^T B )^-1 B^T
-            ) A v
-            +
-            (I - B ( B^T B )^-1 B^T) dA v
-            =
-            (
-                - dB ( B^T B )^-1 B^T
-                - B ( B^T B )^-1 dB^T
-                + B ( B^T B )^-1 dB^T B ( B^T B )^-1 B^T
-                + B ( B^T B )^-1 B^T dB ( B^T B )^-1 B^T
-            ) A v
-            +
-            (I - B ( B^T B )^-1 B^T) dA v
-            =
-            (
-                (B ( B^T B )^-1 B^T - I) dB ( B^T B )^-1 B^T
-                +
-                B ( B^T B )^-1 dB^T ( B ( B^T B )^-1 B^T - I)
-            ) A v
-            +
-            (I - B ( B^T B )^-1 B^T) dA v
-            =
-            (
-                - PI_B dB ( B^T B )^-1 B^T
-                - B ( B^T B )^-1 dB^T PI_B
-            ) A v
-            +
-            (I - B ( B^T B )^-1 B^T) dA v
-
-            but PI_B A v = 0, so
-   
-            PI_B (- dB ( B^T B )^-1 B^T A v + dA v)
-        */
-
-        // Eigen::Matrix<double, m, 1> Av = A*v;
-        // Eigen::Matrix<double, m, 1> virtual_acceleration = PI_B*(dA - dB*inv*BT*Av);
-
-        Eigen::Matrix<double, M1+M2+M3, 3*N> NSS = Bker*A;
-
         Eigen::Matrix<double, M1+M2+M3, M1+M2+M3> to_invert;
-        to_invert = NSS*mIinv*NSS.transpose();
+        to_invert = NS*mIinv*NS.transpose();
 
-        ddtv =
-        free -
-        mIinv*NSS.transpose()*to_invert.llt().solve(
-            NSS*free
+        f_t force_input = getForce(state);
+
+        // acceleration no constraints
+        ddtv_t free_acceleration = mIinv*force_input;
+
+        f_t f;
+        f =
+        -mIinv*NS.transpose()*to_invert.llt().solve(
+            NS*free_acceleration
             +
-            Bker*(dA + dB*ddtq)
-            // Bker*(dA - dB*inv*BT*Av)
+            Bker*(dA + dB*ddtq) // Bker*(dA - dB*inv*BT*Av)
         );
 
-        return ddtv;
+        return f;
     }
 
-
-    ddtv_t
-    ddtV(
-        state_t const & x
-    ){
-        return ddtV(getP(x), getV(x), getForce(x));
-    }
-
+    /**
+     * @brief Get the force applied on the ith rigid body
+     * 
+     * @param k Rigid body id
+     * @return IMS2DSolver::rbf_t Force applied on rigid body
+     */
     virtual
-    f_t
+    IMS2DSolver::rbf_t
     getForce(
-        p_t const & p
-        ,
-        v_t const & v
+        int k
     ){
-        f_t f = f_t::Zero();
+        IMS2DSolver::rbf_t f = IMS2DSolver::rbf_t::Zero();
         f << 0, -10, 0; // kg / s / s
         return f;
     }
 
+    /**
+     * @brief Get the force applied on the mechanical system
+     * 
+     * @param state State of the mechanical system
+     * @return f_t Force applied on the mechanical system
+     */
     virtual
     f_t getForce(
         state_t const & state
     ){
-        return getForce(getP(state), getV(state));
+        f_t f;
+        for(int i = 0; i < N; ++i)
+            f.segment(3*i, 3) = getForce(i);
+        return f;
     }
 
-    v_t getProjectedVelocity(
+    /**
+     * @brief Get a velocity that lives in the correct nullspace
+     * 
+     * @param p Position of the mechanical system
+     * @param q Contact points of the rigid bodies of the mechanical system
+     * @param v Velocity to be projected
+     * @return v_t Velocity that lives in the correct nullspace
+     */
+    v_t
+    getProjectedVelocity(
         p_t const & p
         ,
         q_t const & q
@@ -599,50 +849,51 @@ public:
         return v_projected;
     }
 
-    ddtstate_t getD(
+    /**
+     * @brief Get the state time derivative
+     * 
+     * @param state State of the mechanical system
+     * @return ddtstate_t Time derivative of the state
+     */
+    ddtstate_t getStateDot(
         state_t const & state
     ){
-        // ddtstate_t ddtstate;
-        // ddtstate.segment(0  , 6*N) = ddtP(state);
-        // ddtstate.segment(6*N, 3*N) = ddtV(state);
-        // return ddtstate;
 
         p_t p = state.segment(0, 6*N);
         q_t q = state.segment(6*N, 2*M2);
         v_t v = state.segment(6*N + 2*M2, 3*N);
 
-        ddtv_t ddtv;
-
-        f_t f = getForce(state);
-        // acceleration no constraints
-        ddtv_t free = mIinv*f;
-
-
         d1ck_t A = get_d1ck(p, q);
         d2c_t B = get_d2c(p, q);
         Eigen::Matrix<double, 2*M2, M1+3*M2+M3> BT = B.transpose();
-        // Eigen::Matrix<double, m, m - Q> Bker_aux = BT.fullPivLu().kernel();
-        // Eigen::Matrix<double, m, m - Q> Bker_aux = Eigen::Matrix<double, m, m - Q>::Zero();
-        // std::cout << B << std::endl;
-        // std::cout << BT.fullPivLu().kernel() << std::endl;
-        Eigen::Matrix<double, M1+M2+M3, M1+3*M2+M3> Bker = BT.fullPivLu().kernel().transpose();
-        // std::cout << BT << std::endl;
-        // std::cout << BT.fullPivLu().kernel() << std::endl;
-        // std::cout << BT.fullPivLu().kernel().transpose()*A << std::endl;
-        // std::cout << Bker_aux << std::endl;
-        // std::cout << Bker << std::endl;
+        Eigen::Matrix<double, M1+M2+M3, M1+3*M2+M3> Bker;
+        try{
+            Bker = BT.fullPivLu().kernel().transpose();
+        }
+        catch(...){
+            throw RankLossException();
+        }
 
         /* 
-            N v = 0
-            where N = (I - B ( B^T B )^-1 B^T) A
-            where B = d2c and A = d1c
+            d1c(p, q) k(p) v + d2c(p, q) q_dot = 0
+
+            let A = d1c(p, q) k(p)
+            let B = d2c(p, q)
+            =>
+            
+            q_dot = - ( B^T B )^-1 B^T A v
+            
+            and
+
+            NS v = 0
+            where NS = (I - B ( B^T B )^-1 B^T) A
         */
         // Eigen::Matrix<double, Q, Q> inv = (B.transpose()*B).inverse();
         // Eigen::Matrix<double, m, m> PI_B = Eigen::Matrix<double, m, m>::Identity() - B*inv*BT;
         // Eigen::Matrix<double, m, 3*N> NS = PI_B*A;
         // ddtq_t ddtq = - inv*BT*A*v;
 
-        Eigen::Matrix<double, M1+M2+M3, 3*N> NSS = Bker*A;
+        Eigen::Matrix<double, M1+M2+M3, 3*N> NS = Bker*A;
 
 
         // add stability terms
@@ -655,18 +906,18 @@ public:
         v_t v_stability = stability.segment(0, 3*N);
         ddtq_t ddtq_stability = stability.segment(3*N, 2*M2);
 
-        // ddtp_t p_dot = ddtP(p, v);
+        // without stability
+        // ddtp_t ddtp = ddtP(p, v);
         // ddtq_t ddtq = - (B.transpose()*B).llt().solve(BT*A*v);
-
-        ddtp_t p_dot = ddtP(p, v + v_stability);
+        // with stability
+        ddtp_t ddtp = ddtP(p, v + v_stability);
         ddtq_t ddtq = - (B.transpose()*B).llt().solve(BT*A*v) + ddtq_stability;
 
-
         // ddt(A) v = (dP(A) Pdot + dQ(A) Qdto) v
-        Eigen::Matrix<double, M1+3*M2+M3, 1> dA = get_ddtd1ck(p, p_dot, q, ddtq, v);
+        Eigen::Matrix<double, M1+3*M2+M3, 1> dA = get_ddtd1ck(p, ddtp, q, ddtq, v);
 
         // ddt [B]   = dP(B) Pdot + dQ(B) Qdot
-        Eigen::Matrix<double, M1+3*M2+M3, 2*M2> dB = get_ddtd2c(p, p_dot, q, ddtq);
+        Eigen::Matrix<double, M1+3*M2+M3, 2*M2> dB = get_ddtd2c(p, ddtp, q, ddtq);
 
 
         /*
@@ -717,129 +968,158 @@ public:
         // Eigen::Matrix<double, m, 1> virtual_acceleration = PI_B*(dA - dB*inv*BT*Av);
 
         Eigen::Matrix<double, M1+M2+M3, M1+M2+M3> to_invert;
-        to_invert = NSS*mIinv*NSS.transpose();
+        to_invert = NS*mIinv*NS.transpose();
 
+        f_t f = getForce(state);
+        // acceleration no constraints
+        ddtv_t free = mIinv*f;
+
+        ddtv_t ddtv;
         ddtv =
         free -
-        mIinv*NSS.transpose()*to_invert.llt().solve(
-            NSS*(free + v)
+        mIinv*NS.transpose()*to_invert.llt().solve(
+            NS*(free + v)
             +
             Bker*(dA + dB*ddtq)
             // Bker*(dA - dB*inv*BT*Av)
         );
 
-        Eigen::Matrix<double, M1+M2+M3, 1> error = NSS*v;
-
         ddtstate_t ddtstate;
-        ddtstate.segment(0    , 6*N) = p_dot;
-        ddtstate.segment(6*N  , 2*M2  ) = ddtq;
-        ddtstate.segment(6*N+2*M2, 3*N) = ddtv;
+        ddtstate.segment(0       , 6*N ) = ddtp;
+        ddtstate.segment(6*N     , 2*M2) = ddtq;
+        ddtstate.segment(6*N+2*M2, 3*N ) = ddtv;
         return ddtstate;
 
     }
 
-
-    int
-    functionGSL(
-        double t,
-        const double y[],
-        double ddty[],
-        void * params
-    )
-    {
-
-        state_t state(y);
-        ddtstate_t ddtstate = getD(state);
-        ddty = ddtstate.data();
-
-        return GSL_SUCCESS;
+    /**
+     * @brief Get how close to zero constraints are satisfied
+     * 
+     * @param state State of the mechanical system
+     * @return double norm of the constraints
+     */
+    double
+    gePositionDomainError(
+        state_t const & state
+    ){
+        p_t p = state.segment(0, 6*N);
+        q_t q = state.segment(6*N, 2*M2);
+        
+        cextra_t cextra = get_cextra(p, q);
+        return cextra.norm();
     }
 
+    /**
+     * @brief Get how close to the velocity is to the nullspace
+     * 
+     * @param state State of the mechanical system
+     * @return double Norm of vector that quantifies how close to the velocity is to the nullspace
+     */
+    double
+    getVelocityDomainError(
+        state_t const & state
+    ){
+        p_t p = state.segment(0, 6*N);
+        q_t q = state.segment(6*N, 2*M2);
+        v_t v = state.segment(6*N + 2*M2, 3*N);
 
+        d1ck_t A = get_d1ck(p, q);
+        d2c_t B = get_d2c(p, q);
+        Eigen::Matrix<double, M1+M2+M3, M1+3*M2+M3> Bker = B.transpose().fullPivLu().kernel().transpose();
+        Eigen::Matrix<double, M1+M2+M3, 3*N> NS = Bker*A;
+
+        Eigen::Matrix<double, M1+M2+M3, 1> error = NS*v;
+        return error.norm();
+    }
+
+    /**
+     * @brief Get the constraints satisfaction: c(p,q)
+     * 
+     * @param p Position
+     * @param q Contact points
+     * @return c_t Constraints
+     */
     virtual c_t get_c(p_t const & p, q_t const & q) const = 0;
-    virtual cextra_t get_cextra(p_t const & p, q_t const & q) const = 0;
-    virtual d1cextra_t get_d1cextra(p_t const & p, q_t const & q) const = 0;
-    virtual d2cextra_t get_d2cextra(p_t const & p, q_t const & q) const = 0;
+    /**
+     * @brief Get the derivative of the constraints with respect to the position: d/dp c(p,q)
+     * 
+     * @param p Position
+     * @param q Contact points
+     * @return d1c_t Derivative
+     */
     virtual d1c_t get_d1c(p_t const & p, q_t const & q) const = 0;
+    /**
+     * @brief Get the derivative of the constraints with respect to the position after the position derivative: d/dp c(p,q) k(p)
+     * 
+     * @param p Position
+     * @param q Contact points
+     * @return d1ck_t Derivative
+     */
     virtual d1ck_t get_d1ck(p_t const & p, q_t const & q) const = 0;
+    /**
+     * @brief Get the derivative of the constraints with respect to the contact points: d/dq c(p,q)
+     * 
+     * @param p Position
+     * @param q Contact points
+     * @return d1c_t Derivative
+     */
     virtual d2c_t get_d2c(p_t const & p, q_t const & q) const = 0;
+    /**
+     * @brief Get the time derivative of d1ck(p,q)
+     * 
+     * @param p Position
+     * @param q Contact points
+     * @return ddtd1ck_t Derivative
+     */
     virtual ddtd1ck_t get_ddtd1ck(p_t const & p, ddtp_t const & ddtp, q_t const & q, ddtq_t const & ddtq, v_t const & v) const = 0;
+    /**
+     * @brief Get the time derivative of d2c(p,q)
+     * 
+     * @param p Position
+     * @param q Contact points
+     * @return ddtd2c_t Derivative
+     */
     virtual ddtd2c_t get_ddtd2c(p_t const & p, ddtp_t const & ddtp, q_t const & q, ddtq_t const & ddtq) const = 0;
-    
-    // virtual Eigen::Matrix<double, M1+3*M2+M3, 3*N> getdkc(p_t const & p) {};
 
-    // virtual
-    // Eigen::Matrix<double, M1+3*M2+M3, 3*N>
-    // getdkcS(
-    //     p_t const & p
-    // ){
+    /**
+     * @brief Get the constraints+extra satisfaction: c_extra(p,q)
+     * 
+     * @param p Position
+     * @param q Contact points
+     * @return c_t Constraints+extra
+     */
+    virtual cextra_t get_cextra(p_t const & p, q_t const & q) const = 0;
+    /**
+     * @brief Get the derivative of the constraints+extra with respect to the position: d/dp c_extra(p,q)
+     * 
+     * @param p Position
+     * @param q Contact points
+     * @return d1cextra_t Derivative
+     */
+    virtual d1cextra_t get_d1cextra(p_t const & p, q_t const & q) const = 0;
+    /**
+     * @brief Get the derivative of the constraints+extra with respect to the contact points: d/dq c_extra(p,q)
+     * 
+     * @param p Position
+     * @param q Contact points
+     * @return d2cextra_t Derivative
+     */
+    virtual d2cextra_t get_d2cextra(p_t const & p, q_t const & q) const = 0;
 
-    //     Eigen::Matrix<double, M1+3*M2+M3, 3*N> out;
+    /*************************************************************************/
+    /* GSL minimization solver                                               */
+    /*************************************************************************/
 
-    //     Equations eq;
-    //     for(int i = 0; i < N; ++i){
-    //         Symbolic s = mRB[i].getP().getS();
-    //         for(int j = 0; j < 6; ++j){
-    //             eq = (eq, s(j) == p(6*i + j) );
-    //         }
-    //     }
-
-    //     for(int i = 0; i < M1+3*M2+M3; ++i){
-    //         for(int j = 0; j < 3*N; ++j){ 
-    //             Symbolic s = d1ck[i][j];
-    //             out(i, j) = s[eq];
-    //         }
-
-    //     }
-    //     return out;
-
-    // }
-
-    // virtual
-    // Eigen::Matrix<double, M1+3*M2+M3, 1>
-    // getd2c(
-    //     p_t const & p
-    //     ,
-    //     v_t const & v
-    // ){}
-
-    // virtual
-    // Eigen::Matrix<double, M1+3*M2+M3, 1>
-    // getd2cS(
-    //     p_t const & p
-    //     ,
-    //     v_t const & v
-    // ){
-
-    //     Eigen::Matrix<double, M1+3*M2+M3, 1> out = Eigen::Matrix<double, M1+3*M2+M3, 1>::Zero();
-
-    //     ddtp_t ddtp = ddtP(p, v);
-
-    //     Equations eq;
-    //     for(int i = 0; i < N; ++i){
-    //         Symbolic s = mRB[i].getP().getS();
-    //         for(int j = 0; j < 6; ++j){
-    //             eq = (eq, s(j) == p(6*i + j) );
-    //         }
-    //     }
-
-    //     for(int i = 0; i < M1+3*M2+M3; ++i){
-    //         for(int j = 0; j < 3*N; ++j){
-    //             for(int k = 0; k < 6*N; ++k){
-    //                 Symbolic s = d1d1ck[i][j][k];
-    //                 double tmp = s[eq];
-    //                 out(i) += tmp*ddtp(k)*v(j);
-    //             }
-    //         }
-
-    //     }
-    //     return out;
-
-    // }
-
+    /**
+     * @brief Function which we which to minimize
+     * 
+     * @param v Vector whose value we wish to find where the function is minimized
+     * @param params It will be a pointer to an object of this class
+     * @return double Value of the function at the currect vector
+     */
     static
     double
-    my_f(
+    gsl_errorfunction(
         const gsl_vector *v
         ,
         void *params
@@ -848,122 +1128,33 @@ public:
         MS2DSolverImpl<N, M1, M2, M3> *p = (MS2DSolverImpl<N, M1, M2, M3> *)params;
 
         cextra_t _c = p->get_cextra(
-            p_t(gsl_vector_const_ptr(v, 0))
+            p_t(gsl_vector_const_ptr(v,  0))
             ,
             q_t(gsl_vector_const_ptr(v, 6*N))
         );
 
         return pow(_c.norm(), 2);
 
-        // Equations eq;
-        // for(int i = 0; i < N; ++i){
-        //     Symbolic s = p->mRB[i].getP().getS();
-        //     for(int j = 0; j < 6; ++j){
-        //         eq = (eq, s(j) == gsl_vector_get(v, i*6 + j));
-        //     }
-        // }
-
-        // for(int i = 0; i < 2*M2; ++i){
-        //     eq = (eq, p->qs[i] == gsl_vector_get(v, 6*N + i));
-        // }
-
-        // double out = 0;
-        // for(int i = 0; i < M1+3*M2; ++i){
-        //     Symbolic s = p->c[i];
-        //     double e = s[eq];
-        //     out += e*e/2;
-        // }
-
-        // // for each body, rotation matrix constaints
-        // for(int i = 0; i < N; ++i){
-        //     double r00 = gsl_vector_get(v, i*6 + 2);
-        //     double r01 = gsl_vector_get(v, i*6 + 3);
-        //     double r10 = gsl_vector_get(v, i*6 + 4);
-        //     double r11 = gsl_vector_get(v, i*6 + 5);
-
-        //     double c1 = (r00*r00 + r01*r01 - 1);
-        //     double c2 = (r10*r10 + r11*r11 - 1);
-        //     double c3 = (r00*r10 + r01*r11);
-
-        //     out += (c1*c1 + c2*c2 + c3*c3)/2;
-        // }
-        // return out;
-
     }
 
-    /* The gradient of f, df = (df/dx, df/dy). */
+    /**
+     * @brief Derivative of the function which we which to minimize
+     * 
+     * @details The gradient of f(x1, ..., xn), df = (df/dx1, ... , df/dxn).
+     * 
+     * @param v Vector whose value we wish to find where the function is minimized
+     * @param params It will be a pointer to an object of this class
+     * @param df It will store the derivative
+     */
     static
     void
-    my_df(
+    gsl_derrorfunction(
         const gsl_vector *v,
         void *params,
         gsl_vector *df
     )
     {
 
-        // MS2DSolverImpl<N, M1, M2, M3> *p = (MS2DSolverImpl<N, M1, M2, M3> *) params;
-
-        // Equations eq;
-        // for(int i = 0; i < N; ++i){
-        //     Symbolic s = p->mRB[i].getP().getS();
-        //     for(int j = 0; j < 6; ++j){
-        //         eq = (eq, s(j) == gsl_vector_get(v, i*6 + j));
-        //     }
-        // }
-
-        // for(int i = 0; i < 2*M2; ++i){
-        //     eq = (eq, p->qs[i] == gsl_vector_get(v, 6*N + i));
-        // }
-
-
-        // for(int j = 0; j < 6*N; ++j){
-        //     double df_value = 0;
-        //     for(int i = 0; i < M1 + 3*M2; ++i){
-        //         Symbolic c = p->c[i];
-        //         Symbolic dc = p->d1c[i][j];
-        //         double e = c[eq]*dc[eq];
-        //         df_value += e;
-        //     }
-
-        //     // rigid body number
-        //     int l = j/6;
-        //     // position variable component
-        //     int k = j%6;
-        //     if(k==0 || k==1){
-        //         // 
-        //     }
-        //     else{
-        //         double r00 = gsl_vector_get(v, l*6 + 2);
-        //         double r01 = gsl_vector_get(v, l*6 + 3);
-        //         double r10 = gsl_vector_get(v, l*6 + 4);
-        //         double r11 = gsl_vector_get(v, l*6 + 5);
-
-        //         double c1 = (r00*r00 + r01*r01 - 1);
-        //         double c2 = (r10*r10 + r11*r11 - 1);
-        //         double c3 = (r00*r10 + r01*r11);
-
-        //         switch(k){
-        //             case 2:
-        //                 // derivative w.r.t. r00
-        //                 df_value += c1*2*r00 + c3*r10;
-        //                 break;
-        //             case 3:
-        //                 // derivative w.r.t. r01
-        //                 df_value += c1*2*r01 + c3*r11;
-        //                 break;
-        //             case 4:
-        //                 // derivative w.r.t. r10
-        //                 df_value += c2*2*r10 + c3*r00;
-        //                 break;
-        //             case 5:
-        //                 // derivative w.r.t. r11
-        //                 df_value += c2*2*r11 + c3*r01;
-        //                 break;
-        //         }
-        //     }
-
-        //     gsl_vector_set(df, j, df_value);
-    // }
 
         MS2DSolverImpl<N, M1, M2, M3> *ptr = (MS2DSolverImpl<N, M1, M2, M3> *)params;
 
@@ -985,11 +1176,20 @@ public:
 
     }
 
-    /* Compute both f and df together. */
+    /**
+     * @brief Function and its derivative, where we which to minimize the function
+     * 
+     * @details The gradient of f(x1, ..., xn), df = (df/dx1, ... , df/dxn).
+     * 
+     * @param v Vector whose value we wish to find where the function is minimized
+     * @param params It will be a pointer to an object of this class
+     * @param f Value of the function
+     * @param df It will store the derivative
+     */
     static
     void
-    my_fdf(
-        const gsl_vector *x
+    gsl_errorfunction_complete(
+        const gsl_vector *v
         ,
         void *params
         ,
@@ -998,20 +1198,25 @@ public:
         gsl_vector *df
     )
     {
-        *f = my_f(x, params);
-        my_df(x, params, df);
+        *f = gsl_errorfunction(v, params);
+        gsl_derrorfunction(v, params, df);
     }
 
+    /**
+     * @brief Find position and velocity that satisfies constraints by using a minimizing function from gsl
+     * 
+     * @param p Initial guess for position
+     * @param q Initial guess for contact points
+     * @param v Initial guess for velocity
+     * @return state_t Final state that satisfies constraints
+     */
     state_t
-    project(
-        p_t p = p_t::Zero(),
-        q_t q = q_t::Zero(),
-        v_t v = v_t::Zero()
+    projectMinimizer(
+        p_t const & p = p_t::Zero(),
+        q_t const & q = q_t::Zero(),
+        v_t const & v = v_t::Zero()
     )
     {
-
-        cextra_t _c = get_cextra(p, q);
-        std::cout << "Initial error = " << _c.norm() << std::endl;
 
         size_t iter = 0;
         int status;
@@ -1019,45 +1224,24 @@ public:
         const gsl_multimin_fdfminimizer_type *T;
         gsl_multimin_fdfminimizer *s;
 
-        /* 
-            Position of the minimum (1, 2),
-            scale factors 10, 20
-            height 30
-        */
-
+        // create and populate vector
         gsl_vector *x;
-        gsl_multimin_function_fdf my_func;
-
-        my_func.n = 6*N + 2*M2;
-        my_func.f = MS2DSolverImpl<N, M1, M2, M3>::my_f;
-        my_func.df = MS2DSolverImpl<N, M1, M2, M3>::my_df;
-        // my_func.df = NULL;
-        my_func.fdf = MS2DSolverImpl<N, M1, M2, M3>::my_fdf;
-        my_func.params = this;
-
-
-        /* Starting point, x = (5, 7) */
         x = gsl_vector_alloc(6*N + 2*M2);
-        // std::cout << "error " << my_f(x, this) << std::endl;
-        // for(int i = 0; i < 6*N + 2*M2; ++i)
-        //     gsl_vector_set(x, i, 0.9);
-
-        // gsl_vector_set(x, 0, 0.1);
-        // gsl_vector_set(x, 1, 0.2);
-        // gsl_vector_set(x, 2, 0.8);
-        // gsl_vector_set(x, 3, 0.2);
-        // gsl_vector_set(x, 4, 0.1);
-        // gsl_vector_set(x, 5, 0.7);
-
         for(int i = 0; i < 6*N; ++i)
             gsl_vector_set(x, i, p(i));
         for(int i = 0; i < 2*M2; ++i)
             gsl_vector_set(x, 6*N + i, q(i));
 
-        printf("Initial guess\n");
-        for(int i = 0; i < 6*N + 2*M2; ++i)
-            printf("%.5f ", gsl_vector_get(x, i));
-        printf("\n");
+        gsl_multimin_function_fdf func2min;
+        func2min.n = 6*N + 2*M2;
+        func2min.f = MS2DSolverImpl<N, M1, M2, M3>::gsl_errorfunction;
+        func2min.df = MS2DSolverImpl<N, M1, M2, M3>::gsl_derrorfunction;
+        // func2min.df = NULL;
+        func2min.fdf = MS2DSolverImpl<N, M1, M2, M3>::gsl_errorfunction_complete;
+        func2min.params = this;
+
+        printf("Initial:\n");
+        projectMinimizerPrintInfo(p, q);
 
         T = gsl_multimin_fdfminimizer_conjugate_fr;
         s = gsl_multimin_fdfminimizer_alloc(T, 6*N + 2*M2);
@@ -1067,7 +1251,7 @@ public:
          The accuracy of the line minimization is specified by tol = 1e-6.
          The precise meaning of this parameter depends on the method used.
         */
-        gsl_multimin_fdfminimizer_set(s, &my_func, x, 0.01, 1e-3);
+        gsl_multimin_fdfminimizer_set(s, &func2min, x, 0.01, 1e-3);
 
         do
         {
@@ -1080,59 +1264,39 @@ public:
 
             status = gsl_multimin_test_gradient(s->gradient, 1e-5);
 
-            if(status == GSL_SUCCESS)
-                printf("Minimum found at:\n");
+            // if(status == GSL_SUCCESS)
+            //     printf("Minimum found at:\n");
 
-            printf(
-                "%5d %10.5f\n",
-                static_cast<int>(iter),
-                s->f
-            );
+            // printf(
+            //     "iteration = %5d, value = %10.5f\n",
+            //     static_cast<int>(iter),
+            //     s->f
+            // );
 
-            for(int i = 0; i < 6*N + 2*M2; ++i)
-                printf("%.5f ", gsl_vector_get(s->x, i));
-            printf("\n");
+            // for(int i = 0; i < 6*N + 2*M2; ++i)
+            //     printf("%.5f ", gsl_vector_get(s->x, i));
+            // printf("\n");
 
         }
         while (status == GSL_CONTINUE && iter < 100);
 
-
-
-        // p_t p_out = p_t(s->x->data);
         Eigen::Matrix<double, 6*N + 2*M2, 1> p_and_q(s->x->data);
+        p_t pfinal = p_and_q.segment(0,6*N);
+        q_t qfinal = p_and_q.segment(6*N,2*M2);
 
-        p_t p0 = p_and_q.segment(0,6*N);
-        q_t q0 = p_and_q.segment(6*N,2*M2);
-        projectSolver(
-            p0, q0
-        );
-        p_and_q << p0, q0;
+        printf("Final:\n");
+        projectMinimizerPrintInfo(pfinal, qfinal);
 
-        // v_t v = v_t::Zero();
-        // v(0) = 10;
-        // v(1) = -10;
-        // Eigen::Matrix<double, m, 3*N> dkc = getdkc(p_out);
-        // Eigen::Matrix<double, m, m> to_invert = dkc*dkc.transpose();
-        // v_t v_out = v - dkc.transpose()*to_invert.llt().solve(dkc*v);
-        // v_t v_out = v;
-        v_t v_out = getProjectedVelocity(
-            p_and_q.segment(0, 6*N)
-            ,
-            p_and_q.segment(6*N, 2*M2)
-            ,
+        v_t vfinal = getProjectedVelocity(
+            pfinal,
+            qfinal,
             v
         );
 
         state_t out;
-        out.segment(0, 6*N + 2*M2) = p_and_q;
-        out.segment(6*N + 2*M2, 3*N) = v_out;
-
-        // out(0) += 10;
-
-        // state_t out;
-        // out.segment(0, 6*N) = p;
-        // out.segment(6*N, 2*M2) = q;
-        // out.segment(6*N + 2*M2, 3*N) = v;
+        out.segment(0, 6*N) = pfinal;
+        out.segment(6*N, 2*M2) = qfinal;
+        out.segment(6*N + 2*M2, 3*N) = vfinal;
 
         gsl_multimin_fdfminimizer_free(s);
         gsl_vector_free(x);
@@ -1140,154 +1304,79 @@ public:
         return out;
     }
 
-    static
-    int
-    func(
-        double t,
-        const double y[],
-        double f[],
-        void *params
-    )
-    {
-        (void)(t); /* avoid unused parameter warning */
-        MS2DSolverImpl<N, M1, M2, M3> *p = (MS2DSolverImpl<N, M1, M2, M3> *) params;
-
-        /* this does not work:
-        p->getD(state_t(y)) is a temporary object
-        and the operation 'f = p->getD(state_t(y)).data()' does not copy anything
-        so f will be pointing to just zeros,
-        which is the default initialization
-        */
-        // f = p->getD(state_t(y)).data();
-
-        state_t x = p->getD(state_t(y));
-        for(int i = 0; i < (6+3)*N + 2*M2; ++i)
-            f[i] = x(i);
-
-        return GSL_SUCCESS;
-    }
-
-    int
-    solve(
-        int K = 10
-    )
-    {
-        //   gsl_odeiv2_system sys = {func, jac, (6+3)*N, &this};
-        gsl_odeiv2_system sys = {MS2DSolverImpl<N, M1, M2, M3>::func, NULL, (6+3)*N + 2*M2, this};
-
-        gsl_odeiv2_driver * d = gsl_odeiv2_driver_alloc_y_new(
-            &sys,
-            gsl_odeiv2_step_rk8pd,
-            1e-6,
-            1e-6,
-            0.0
-        );
-
-        double t = 0.0, t1 = 1.0;
-
-        // problem with this
-        // double *y = project().data();
-
-        double yall[K+1][(6+3)*N + 2*M2];
-
-        double y[(6+3)*N + 2*M2];
-        state_t x0 = project();
-        for(int i = 0; i < (6+3)*N + 2*M2; ++i)
-            y[i] = x0(i);
-
-        for(int j = 0; j < (6+3)*N + 2*M2; ++j)
-            yall[0][j] = y[j];
-
-        for (int i = 1; i <= K; i++)
-        {
-
-            printf ("%.5e %.5e %.5e\n", t, y[0], y[1]);
-
-            double ti = i * t1 / static_cast<double>(K);
-            int status = gsl_odeiv2_driver_apply(d, &t, ti, y);
-
-            for(int j = 0; j < (6+3)*N; ++j)
-                yall[i][j] = y[j];
-
-            if (status != GSL_SUCCESS)
-            {
-                printf ("error, return value=%d\n", status);
-                break;
-            }
-
-        }
-
-        gsl_odeiv2_driver_free(d);
-        return 0;
-    }
-
-    virtual
-    int solverImplementation(
-        double time_initial,
-        double time_step,
-        int steps,
-        double** yall,
-        int * current_step
+    /**
+     * @brief Useful printing function used by projectMinimizer to print error
+     * 
+     * @param p Position
+     * @param q Contact points
+     */
+    void
+    projectMinimizerPrintInfo(
+        p_t const & p,
+        q_t const & q
     ){
-        //   gsl_odeiv2_system sys = {func, jac, (6+3)*N, &this};
-        gsl_odeiv2_system sys = {MS2DSolverImpl<N, M1, M2, M3>::func, NULL, (6+3)*N + 2*M2, this};
+        printf("Guess: \n");
+        for(int i = 0; i < 6*N; ++i)
+            printf("%.5f, ", p(0));
+        for(int i = 0; i < 2*M2; ++i)
+            printf("%.5f, ", q(0));
+        printf("\n");
+        cextra_t _c = get_cextra(p, q);
+        std::cout << "Error = " << _c.norm() << std::endl;
+    }
 
-        gsl_odeiv2_driver * d = gsl_odeiv2_driver_alloc_y_new(
-            &sys,
-            gsl_odeiv2_step_rk8pd,
-            1e-6,
-            1e-6,
-            0.0
-        );
+    /*************************************************************************/
+    /* GSL minimization solver: this one is based on solving a               */
+    /* differential equation                                                 */
+    /*************************************************************************/
 
-        double t = time_initial;
-        double t1 = time_initial + steps*time_step;
+    /**
+     * @brief Find position and velocity that satisfies constraints by using a differential equation solver
+     * 
+     * @param p Initial guess for position
+     * @param q Initial guess for contact points
+     * @param v Initial guess for velocity
+     * @return state_t Final state that satisfies constraints
+     */
+    state_t
+    projectSolver(
+        p_t const & p = q_t::Zero(),
+        q_t const & q = q_t::Zero(),
+        v_t const & v = v_t::Zero()
+    )
+    {
 
-        double y[(6+3)*N + 2*M2];
-        state_t x0 = project(p0, q0, v0);
+        p_t pf = p;
+        q_t qf = q;
+        projectSolverEvolve(pf, qf);
+        v_t vf = getProjectedVelocity(pf, qf, v);
 
-        for(int i = 0; i < (6+3)*N + 2*M2; ++i)
-            y[i] = x0(i);
+        state_t out;
+        out.segment(0, 6*N) = pf;
+        out.segment(6*N, 2*M2) = qf;
+        out.segment(6*N + 2*M2, 3*N) = vf;
 
-        for(int j = 0; j < (6+3)*N + 2*M2; ++j)
-            yall[0][j] = y[j];
+        return out;
+    }
 
-        for (int i = 0; i < steps; i++)
-        {
-            *current_step = i;
-            c_t _c = get_c(p_t(&y[0]), q_t(&y[6*N]));
-
-            // printf ("%.5e %.5e %.5e\n", t, y[0], y[1]);
-
-            double ti = time_initial + (i + 1) * time_step;
-            int status = gsl_odeiv2_driver_apply(d, &t, ti, y);
-            // ddtv_t forces = getInternalForces(state_t(y));
-            ddtv_t forces = ddtv_t::Zero();
-
-            for(int j = 0; j < (6+3)*N + 2*M2; ++j)
-                yall[i][j] = y[j];
-            for(int j = 0; j < 3*N; ++j)
-                yall[i][(6+3)*N  + 2*M2 + j] = forces(j);
-
-            if (status != GSL_SUCCESS)
-            {
-                printf ("error, return value=%d\n", status);
-                break;
-            }
-
-        }
-
-        gsl_odeiv2_driver_free(d);
-        return 0;
-    };
-
-    int projectSolver(
+    /**
+     * @brief Method that invokes the differential equation solver that steers d/dtc(p,q) towards zero
+     * 
+     * @param p0 Initial guess for the position
+     * @param q0 Initial guess for the contact points
+     * @param time_step Time step used in solver
+     * @param steps Maxium number of times steps
+     * @param threshold Threshold used to terminate solver if it is reached from below
+     * @return int Success or failure
+     */
+    int projectSolverEvolve(
         p_t & p0,
         q_t & q0,
+        double time_step = 0.01,
         int steps = 300,
-        double time_step = 0.01
+        double threshold = 0.001
     ){
-        //   gsl_odeiv2_system sys = {func, jac, (6+3)*N, &this};
+        //   gsl_odeiv2_system sys = {function, jacobian, dimension, pointer to parameters};
         gsl_odeiv2_system sys = {MS2DSolverImpl<N, M1, M2, M3>::getPositionSolver, NULL, 6*N + 2*M2, this};
 
         gsl_odeiv2_driver * d = gsl_odeiv2_driver_alloc_y_new(
@@ -1298,22 +1387,16 @@ public:
             0.0
         );
 
-        c_t _c1 = get_c(p0, q0);
-        cextra_t _cextra1 = get_cextra(p0, q0);
+        printf("Initial:\n");
+        projectSolverEvolvePrint(p0,q0);
 
         double t = 0;
-
         double y[6*N + 2*M2];
-
-        for(int i = 0; i < 6*N; ++i)
-            y[i] = p0(i);
-
-        for(int i = 0; i < 2*M2; ++i)
-            y[6*N + i] = q0(i);
+        for(int i = 0; i < 6*N; ++i) y[i] = p0(i);
+        for(int i = 0; i < 2*M2; ++i) y[6*N + i] = q0(i);
 
         for (int i = 0; i < steps; i++)
         {
-
 
             double ti = (i + 1) * time_step;
             int status = gsl_odeiv2_driver_apply(d, &t, ti, y);
@@ -1323,22 +1406,68 @@ public:
                 printf ("error, return value=%d\n", status);
                 break;
             }
-
+            if(projectSolverEvolveGetError(y) < threshold){
+                printf("Solver got error below threshold after %d steps.\n", i);
+                break;
+            }
         }
 
-        for(int i = 0; i < 6*N; ++i)
-            p0(i) = y[i];
+        for(int i = 0; i < 6*N; ++i)  p0(i) = y[i];
+        for(int i = 0; i < 2*M2; ++i) q0(i) = y[6*N + i];
 
-        for(int i = 0; i < 2*M2; ++i)
-            q0(i) = y[6*N + i];
-
-        c_t _c2 = get_c(p0, q0);
-        cextra_t _cextra2 = get_cextra(p0, q0);
+        printf("Final:\n");
+        projectSolverEvolvePrint(p0,q0);
 
         gsl_odeiv2_driver_free(d);
         return 0;
     };
 
+    /**
+     * @brief Auxiliary method used by projectSolverEvolve
+     * 
+     * @param y Array with position p and contact points q
+     * @return double Error ||c(p, q)||
+     */
+    double projectSolverEvolveGetError(
+        double y[6*N + 2*M2]
+    ){
+        p_t p(&y[0]);
+        q_t q(&y[6*N]);
+        cextra_t _cextra = get_cextra(p0, q0);
+        return _cextra.norm();
+    }
+
+    /**
+     * @brief Auxiliary method used by projectSolverEvolve that prints position p, contact points q, and error c(p, q)
+     * 
+     * @param p0 Position p
+     * @param q0 Contact points q
+     */
+    void
+    projectSolverEvolvePrint(
+        p_t const & p0,
+        q_t const & q0
+    ){
+        printf("Guess: \n");
+        for(int i = 0; i < 6*N; ++i)
+            printf("%.5f, ", p0(i));
+        for(int i = 0; i < 2*M2; ++i)
+            printf("%.5f, ", q0(i));
+        printf("\n");
+        cextra_t _cextra = get_cextra(p0, q0);
+        std::cout << "Error = " << _cextra.norm() << std::endl;
+    }
+
+
+    /**
+     * @brief Differential equation that guides (p,q) such that c(p,q) -> constant (hopefully zero)
+     * 
+     * @param t Time t
+     * @param y Vector comprising of p and q
+     * @param ddty Time derivative of p and q
+     * @param params Pointer to object of this class
+     * @return int Success or failure
+     */
     static
     int
     getPositionSolver(
@@ -1349,6 +1478,7 @@ public:
     ){
 
         (void)(t); /* avoid unused parameter warning */
+        // cast to pointer to object of this class
         MS2DSolverImpl<N, M1, M2, M3> *ptr = (MS2DSolverImpl<N, M1, M2, M3> *) params;
 
         Eigen::Matrix<double, 6*N + 2*M2, 1> pandq(y);
@@ -1358,18 +1488,6 @@ public:
         // add stability terms
         // for stability terms, we must consider the non holonomic constraints
         c_t _c = ptr->get_c(p, q);
-
-        // d1c_t A = ptr->get_d1c(p, q);
-        // d2c_t B = ptr->get_d2c(p, q);
-
-        // // _c should be zero, in which case, stability = 0
-        // Eigen::Matrix<double, M1+3*M2+M3, 6*N + 2*M2> K;
-        // K << A, B;
-        // Eigen::Matrix<double, 6*N + 2*M2, 1> stability = -K.transpose()*(K*K.transpose()).llt().solve(_c);
-
-        // ddtp_t p_dot = stability.segment(0, 6*N);
-        // ddtq_t q_dot = stability.segment(6*N, 2*M2);
-
 
         d1ck_t A = ptr->get_d1ck(p, q);
         d2c_t B = ptr->get_d2c(p, q);
@@ -1388,11 +1506,123 @@ public:
         // does not work
         // ddty = pandq_dot.data();
 
+        // saves derivative to ddty
         for(int i = 0; i < 6*N + 2*M2; ++i)
             ddty[i] = pandq_dot(i);
 
         return GSL_SUCCESS;
     }
+
+    /*************************************************************************/
+    /* GSL differential equation solver                                      */
+    /*************************************************************************/
+
+    /**
+     * @brief Function used by gsl_odeiv2_system that encapsulates d/dt state
+     * 
+     * @param t Time instant t
+     * @param y State
+     * @param f d/dt State
+     * @param params Pointer to object on this class
+     * @return int Success or failure
+     */
+    static
+    int
+    ddtState(
+        double t,
+        const double y[],
+        double f[],
+        void *params
+    )
+    {
+        (void)(t); /* avoid unused parameter warning */
+        MS2DSolverImpl<N, M1, M2, M3> *p = (MS2DSolverImpl<N, M1, M2, M3> *) params;
+
+        /* this does not work:
+        p->getStateDot(state_t(y)) is a temporary object
+        and the operation 'f = p->getStateDot(state_t(y)).data()' does not copy anything
+        so f will be pointing to just zeros,
+        which is the default initialization
+        */
+        // f = p->getStateDot(state_t(y)).data();
+
+        state_t x = p->getStateDot(state_t(y));
+        for(int i = 0; i < (6+3)*N + 2*M2; ++i)
+            f[i] = x(i);
+
+        return GSL_SUCCESS;
+    }
+
+    /**
+     * @brief Solve differential equations that represent dynamics of mechanical system
+     * 
+     * @param time_initial Initial time instant
+     * @param time_step Time step
+     * @param steps Number of steps
+     * @param yall Where solution of differential equations is stored
+     * @param current_step Indicates at which step we are currently at
+     * @return int Success or failure
+     */
+    virtual
+    int solverImplementation(
+        double time_initial,
+        double time_step,
+        int steps,
+        double** yall,
+        int * current_step
+    ){
+        //   gsl_odeiv2_system sys = {function, jacobian, dimension, pointer to parameters};
+        gsl_odeiv2_system sys = {MS2DSolverImpl<N, M1, M2, M3>::ddtState, NULL, (6+3)*N + 2*M2, this};
+
+        gsl_odeiv2_driver * d = gsl_odeiv2_driver_alloc_y_new(
+            &sys,
+            gsl_odeiv2_step_rk8pd,
+            1e-6,
+            1e-6,
+            0.0
+        );
+
+        double t = time_initial;
+        double t1 = time_initial + steps*time_step;
+
+        double y[(6+3)*N + 2*M2];
+        // this does not work that well
+        // state_t x0 = projectMinimizer(p0, q0, v0);
+        // this works better
+        state_t x0 = projectSolver(p0, q0, v0);
+
+        for(int i = 0; i < (6+3)*N + 2*M2; ++i)
+            y[i] = x0(i);
+
+        for(int j = 0; j < (6+3)*N + 2*M2; ++j)
+            yall[0][j] = y[j];
+
+        for (int i = 0; i < steps; i++)
+        {
+            *current_step = i;
+            // c_t _c = get_c(p_t(&y[0]), q_t(&y[6*N]));
+
+            double ti = time_initial + (i + 1) * time_step;
+            int status = gsl_odeiv2_driver_apply(d, &t, ti, y);
+            f_t forces = getInternalForces(state_t(y));
+
+            for(int j = 0; j < (6+3)*N + 2*M2; ++j)
+                yall[i][j] = y[j];
+            for(int j = 0; j < 3*N; ++j)
+                yall[i][(6+3)*N  + 2*M2 + j] = forces(j);
+
+            if (status != GSL_SUCCESS)
+            {
+                printf ("error, return value=%d\n", status);
+                break;
+            }
+
+        }
+
+        gsl_odeiv2_driver_free(d);
+        return 0;
+    };
+
 
     p_t p0;
     q_t q0;
@@ -1411,28 +1641,36 @@ private:
      */
     std::array<std::string, N> mRBNames;
 
-    /* inertia matrix */
+    /**
+     * @brief Inertia matrix
+     * 
+     */
     Eigen::Matrix<double, 3*N, 3*N> mI;
+    /**
+     * @brief Inverse of inertia matrix
+     * 
+     */
     Eigen::Matrix<double, 3*N, 3*N> mIinv;
+    /**
+     * @brief List with rigid bodies id's which have non-sliding contact constraints
+     * 
+     */
     std::list<int> mListWithContact;
 
-
+    /**
+     * @brief Validate rigid body id and throw exception if it is not valid
+     * 
+     * @param i rigid body id
+     */
+    void validateId (
+        int i
+    ) const {
+        if(i < 0 || i >= N){
+            std::string msg = std::string("Mechanical system ") + mName + std::string(" has only ") + std::to_string(N) + std::string(" rigid bodies.");
+            throw std::invalid_argument(msg);
+        }
+    }
 };
-
-template<int N, int M1, int M2, int M3>
-int
-func(
-    double t,
-    const double y[],
-    double ddty[],
-    void * params
-)
-{
-
-    MS2DSolverImpl<N, M1, M2, M3> r = *(MS2DSolverImpl<N, M1, M2, M3> *)params;
-    return r.functionGSL(t, y, ddty, params);
-
-}
 
 
 

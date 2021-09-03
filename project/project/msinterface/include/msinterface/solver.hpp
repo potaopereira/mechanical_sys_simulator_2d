@@ -13,27 +13,27 @@ public:
 
 
     /**
-     * @brief rigid body position
+     * @brief Rigid body position/pose
      * 
      */
     typedef Eigen::Matrix<double, 6, 1> rbp_t;
     /**
-     * @brief rigid body velocity
+     * @brief Rigid body velocity/twist
      * 
      */
     typedef Eigen::Matrix<double, 3, 1> rbv_t;
     /**
-     * @brief rigid body force
+     * @brief Rigid body force/wrench
      * 
      */
     typedef Eigen::Matrix<double, 3, 1> rbf_t;
     /**
-     * @brief vector
+     * @brief 2D Vector
      * 
      */
     typedef Eigen::Matrix<double, 2, 1> v_t;
     /**
-     * @brief rigid body inertia
+     * @brief Rigid body inertia
      * 
      */
     typedef std::array<double, 2> rbi_t;

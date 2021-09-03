@@ -46,7 +46,9 @@ public:
     );
 
 public slots:
-    void showBoundary();
+    void showBoundary(
+        bool checked
+    );
     
     void
     setBoundaryColor(
@@ -66,13 +68,28 @@ public slots:
         //
     );
 
+    void showPosition(
+        bool checked
+    );
+
+    void showVelocity(
+        bool checked
+    );
+
+    void showForce(
+        bool checked
+    );
+
 private:
     IMS2D* mIMS2D;
     int mBodyId;
     QGridLayout mQGridLayout;
     std::array<QLineEdit, 3> mInertia;
+    QCheckBox mShowPosition;
     std::array<QLineEdit, 3> mPosition;
+    QCheckBox mShowVelocity;
     std::array<QLineEdit, 3> mVelocity;
+    QCheckBox mShowForce;
     std::array<QLineEdit, 3> mForce;
     std::array<QLineEdit, 3> mRelativeInput;
     std::array<QLineEdit, 3> mRelativeVelocity;

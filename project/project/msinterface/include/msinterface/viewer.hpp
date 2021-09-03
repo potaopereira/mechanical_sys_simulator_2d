@@ -94,6 +94,24 @@ public:
     ) = 0;
 
     virtual
+    void showPosition(
+        int i, // rigid body id
+        bool show
+    ) = 0;
+
+    virtual
+    void showVelocity(
+        int i, // rigid body id
+        bool show
+    ) = 0;
+
+    virtual
+    void showForce(
+        int i, // rigid body id
+        bool show
+    ) = 0;
+
+    virtual
     void showBoundary(
         int i, // rigid body id
         bool show

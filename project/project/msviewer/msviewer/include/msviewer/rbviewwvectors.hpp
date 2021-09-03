@@ -71,6 +71,14 @@ public:
         std::vector<Eigen::Matrix<double, 2, 1>> const & body_vectors
     );
 
+    void showPosition(
+    );
+    void hidePosition(
+    );
+    void setPosition(
+        Eigen::Matrix<double, 6, 1> const & position = Eigen::Matrix<double, 6, 1>::Zero()
+    );
+
     void showVelocity(
     );
     void hideVelocity(

@@ -60,6 +60,12 @@ public:
         ap_t const & angular_position
     );
 
+    void showPosition(
+    );
+
+    void hidePosition(
+    );
+
     void showBoundary(
         bool show = true
     );

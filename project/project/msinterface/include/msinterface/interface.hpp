@@ -140,6 +140,27 @@ public:
         return mViewer->getView();
     };
 
+    void showPosition(
+        int i, // rigid body id
+        bool show
+    ){
+        mViewer->showPosition(i, show);
+    };
+
+    void showVelocity(
+        int i, // rigid body id
+        bool show
+    ){
+        mViewer->showVelocity(i, show);
+    }
+
+    void showForce(
+        int i, // rigid body id
+        bool show
+    ){
+        mViewer->showForce(i, show);
+    }
+
     void showBoundary(
         int i, // rigid body id
         bool show

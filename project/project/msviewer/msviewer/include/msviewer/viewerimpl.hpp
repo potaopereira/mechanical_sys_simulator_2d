@@ -131,6 +131,45 @@ public:
     }
 
     virtual
+    void showPosition(
+        int body_id,
+        bool show
+    ){
+        if(body_id < N){
+            if(show)
+                mListOfBodies[body_id]->showPosition();
+            else
+                mListOfBodies[body_id]->hidePosition();
+        }
+    }
+
+    virtual
+    void showVelocity(
+        int body_id,
+        bool show
+    ){
+        if(body_id < N){
+            if(show)
+                mListOfBodies[body_id]->showVelocity();
+            else
+                mListOfBodies[body_id]->hideVelocity();
+        }
+    }
+
+    virtual
+    void showForce(
+        int body_id,
+        bool show
+    ){
+        if(body_id < N){
+            if(show)
+                mListOfBodies[body_id]->showForce();
+            else
+                mListOfBodies[body_id]->hideForce();
+        }
+    }
+
+    virtual
     void showBoundary(
         int body_id,
         bool show

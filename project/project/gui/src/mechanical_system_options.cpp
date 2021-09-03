@@ -16,10 +16,6 @@ mBodyId(bodyId)
 ,
 mQGridLayout()
 {
-    connect(
-        &mShowBoundary, &QCheckBox::pressed,
-        this, &RBOptions::showBoundary
-    );
 
     mQGridLayout.addWidget(new QLabel( ms->getName(mBodyId).c_str()), 0, 0);
 
@@ -43,30 +39,54 @@ mQGridLayout()
 
     ++k;
     mQGridLayout.addWidget(new QLabel("position"), k, 1);
+    mQGridLayout.addWidget(&mShowPosition, k, 2);
     mPosition[0].setToolTip("linear position x in mm");
-    mQGridLayout.addWidget(&mPosition[0], k, 2);
+    mQGridLayout.addWidget(&mPosition[0], k, 3);
     mPosition[1].setToolTip("linear position y in mm");
-    mQGridLayout.addWidget(&mPosition[1], k, 3);
+    mQGridLayout.addWidget(&mPosition[1], k, 4);
     mPosition[2].setToolTip("angular position in degrees");
-    mQGridLayout.addWidget(&mPosition[2], k, 4);
+    mQGridLayout.addWidget(&mPosition[2], k, 5);
+    connect(
+        &mShowPosition, &QCheckBox::toggled,
+        this, &RBOptions::showPosition
+    );
+    // by default position is shown
+    mShowPosition.setChecked(true);
+    showPosition(true);
 
     ++k;
     mQGridLayout.addWidget(new QLabel("velocity"), k, 1);
+    mQGridLayout.addWidget(&mShowVelocity, k, 2);
     mVelocity[0].setToolTip("linear velocity x in mm/s");
-    mQGridLayout.addWidget(&mVelocity[0], k, 2);
+    mQGridLayout.addWidget(&mVelocity[0], k, 3);
     mVelocity[1].setToolTip("linear velocity y in mm/s");
-    mQGridLayout.addWidget(&mVelocity[1], k, 3);
+    mQGridLayout.addWidget(&mVelocity[1], k, 4);
     mVelocity[2].setToolTip("angular velocity in degrees/s");
-    mQGridLayout.addWidget(&mVelocity[2], k, 4);
+    mQGridLayout.addWidget(&mVelocity[2], k, 5);
+    connect(
+        &mShowVelocity, &QCheckBox::toggled,
+        this, &RBOptions::showVelocity
+    );
+    // by default velocity is not shown
+    mShowVelocity.setChecked(false);
+    showVelocity(false);
 
     ++k;
     mQGridLayout.addWidget(new QLabel("force"), k, 1);
+    mQGridLayout.addWidget(&mShowForce, k, 2);
     mForce[0].setToolTip("linear force x in kg mm / s / s");
-    mQGridLayout.addWidget(&mForce[0], k, 2);
+    mQGridLayout.addWidget(&mForce[0], k, 3);
     mForce[1].setToolTip("linear force y in kg mm / s / s");
-    mQGridLayout.addWidget(&mForce[1], k, 3);
+    mQGridLayout.addWidget(&mForce[1], k, 4);
     mForce[2].setToolTip("angular force in (kg / mm / mm / s / s) times 180/pi");
-    mQGridLayout.addWidget(&mForce[2], k, 4);
+    mQGridLayout.addWidget(&mForce[2], k, 5);
+    connect(
+        &mShowForce, &QCheckBox::toggled,
+        this, &RBOptions::showForce
+    );
+    // by default force is not shown
+    mShowForce.setChecked(false);
+    showForce(false);
 
     ++k;
     mQGridLayout.addWidget(new QLabel("point"), k, 1);
@@ -83,13 +103,18 @@ mQGridLayout()
     ++k;
     mQGridLayout.addWidget(new QLabel("show boundary"), k, 1);
     mQGridLayout.addWidget(&mShowBoundary, k, 2);
-    // by default boundary is shown
-    mShowBoundary.setDown(false);
     mQGridLayout.addWidget(&mColorButton, k, 3);
     connect(
         &mColorButton, &ColorButton::colorChanged,
         this, &RBOptions::setBoundaryColor
     );
+    connect(
+        &mShowBoundary, &QCheckBox::toggled,
+        this, &RBOptions::showBoundary
+    );
+    // by default boundary is shown
+    mShowBoundary.setChecked(true);
+    showBoundary(true);
 
     IMRB2DPARAM::map_t m = mIMS2D->getFloatParameters();
     for(IMRB2DPARAM::map_t::iterator it = m.begin(); it!=m.end(); ++it){
@@ -119,9 +144,10 @@ mQGridLayout()
 
 void
 RBOptions::showBoundary(
-
+    bool checked
 ){
-    mIMS2D->showBoundary(mBodyId, mShowBoundary.isChecked());
+    mIMS2D->showBoundary(mBodyId, checked);
+    // mIMS2D->showBoundary(mBodyId, mShowBoundary.isChecked());
 }
 
 void
@@ -182,6 +208,30 @@ RBOptions::changeAngularInertia(){
     if(moment_of_inertia>0)
         mIMS2D->setAngularInertia(moment_of_inertia, mBodyId);
 
+}
+
+void
+RBOptions::showPosition(
+    bool checked
+){
+    mIMS2D->showPosition(mBodyId, checked);
+    // mIMS2D->showPosition(mBodyId, mShowPosition.isChecked());
+}
+
+void
+RBOptions::showVelocity(
+    bool checked
+){
+    mIMS2D->showVelocity(mBodyId, checked);
+    // mIMS2D->showVelocity(mBodyId, mShowVelocity.isChecked());
+}
+
+void
+RBOptions::showForce(
+    bool checked
+){
+    mIMS2D->showForce(mBodyId, checked);
+    // mIMS2D->showForce(mBodyId, mShowForce.isChecked());
 }
 
 MSOptions::MSOptions(

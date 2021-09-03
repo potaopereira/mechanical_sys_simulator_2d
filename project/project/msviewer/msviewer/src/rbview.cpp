@@ -100,6 +100,20 @@ RBView::setPose(
 }
 
 void
+RBView::showPosition(
+){
+    mAxes1->setVisible(true);
+    mAxes2->setVisible(true);
+}
+
+void
+RBView::hidePosition(
+){
+    mAxes1->setVisible(false);
+    mAxes2->setVisible(false);
+}
+
+void
 RBView::showBoundary(
     bool show
 ){

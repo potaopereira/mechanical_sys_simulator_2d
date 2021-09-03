@@ -138,6 +138,25 @@ RBViewWVectors::setPoseAndVectors(
 }
 
 void
+RBViewWVectors::showPosition(
+){
+    mRBView->showPosition();
+}
+
+void
+RBViewWVectors::hidePosition(
+){
+    mRBView->hidePosition();
+}
+
+void
+RBViewWVectors::setPosition(
+    Eigen::Matrix<double, 6, 1> const & position
+){
+    mRBView->setPose(position);
+}
+
+void
 RBViewWVectors::showVelocity(
 ){
     showLinearVelocity();

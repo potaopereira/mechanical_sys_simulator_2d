@@ -53,7 +53,12 @@ target_link_libraries(${PROJECT_APPLICATION_NAME}
     Qt5::Widgets
     MSInterface
     yaml-cpp
-    ExampleMS
+    BallOnSlope
+    SlidingBallOnSlope
+    BallOnCircle
+    SlidingBallOnCircle
+    BarPendulum
+    # ExampleMS
 )
 
 # add_launch_json(_name _program _args _cwd)

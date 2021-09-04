@@ -1,2 +1,7 @@
 # add_subdirectory(pendulum)
-add_subdirectory(examplems)
+add_subdirectory(ExampleMS)
+add_subdirectory(BallOnSlope)
+add_subdirectory(SlidingBallOnSlope)
+add_subdirectory(BallOnCircle)
+add_subdirectory(SlidingBallOnCircle)
+add_subdirectory(BarPendulum)

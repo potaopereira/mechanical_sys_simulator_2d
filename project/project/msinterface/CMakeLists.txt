@@ -16,6 +16,7 @@ set(
     include/msinterface/solver.hpp
     include/msinterface/viewer.hpp
     include/msinterface/interface.hpp
+    include/msinterface/exceptions.hpp
 )
 
 set(

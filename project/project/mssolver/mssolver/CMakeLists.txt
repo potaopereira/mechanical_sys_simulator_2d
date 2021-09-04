@@ -5,7 +5,6 @@ find_package(GSL REQUIRED)
 
 set(
     PUB_HEADERS
-    include/rb2d/mssolverimpl.hpp
     include/rb2d/util.hpp
 )
 

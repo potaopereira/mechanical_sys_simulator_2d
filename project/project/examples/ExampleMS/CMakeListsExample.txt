@@ -1,0 +1,53 @@
+set(APPLICATION_NAME ExampleMS)
+
+
+set(
+    SRCS
+    src/main.cpp
+    src/examplems.cpp
+)
+
+add_executable(
+    ${APPLICATION_NAME}APP
+    ${SRCS}
+)
+
+add_custom_target(dfunctions
+  ${APPLICATION_NAME}APP "dfunctions.cpp"
+  WORKING_DIRECTORY
+    ${CMAKE_CURRENT_BINARY_DIR}
+  COMMENT
+    "Creating dfunctions.cpp for ${APPLICATION_NAME}: generates dfunctions.cpp"
+  VERBATIM
+)
+
+
+set(
+    SRCS_LIBRARY
+    src/examplems.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/dfunctions.cpp
+    src/examplemssolver.cpp
+    src/examplemsviewer.cpp
+)
+
+add_library(
+    ${APPLICATION_NAME}
+    ${SRCS_LIBRARY}
+)
+
+add_dependencies(
+    ${APPLICATION_NAME}
+    dfunctions
+)
+
+target_include_directories(
+    ${APPLICATION_NAME}
+    PUBLIC include
+)
+
+target_link_libraries(
+    ${APPLICATION_NAME}
+    PUBLIC MSInterface
+    PUBLIC MSSolver
+    PUBLIC MSViewer
+)

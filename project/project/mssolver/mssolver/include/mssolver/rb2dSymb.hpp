@@ -40,13 +40,12 @@ private:
 };
 
 /**
- * @brief system is a (3*N + 2*M2 - (M1 + 3*M2))-th dimensional system
- * 
- * 3*N + M1 - M2
+ * @brief Mechanical system is a (3*N - (M1 + M2 + M3))-th dimensional system
  * 
  * @tparam N number of rigid bodies
- * @tparam m number of constraints
- * @tparam p number of auxiliary variables
+ * @tparam M1 number of holonomic constraints
+ * @tparam M2 number of contact contraints
+ * @tparam M3 number of non-sliding contact contraints
  */
 template<int N, int M1, int M2, int M3>
 class MRB2DSYMB:
@@ -191,8 +190,12 @@ public:
         construct_constraints();
         compute_derivatives();
 
-        f << mName << "::c_t\n";
-        f << mName << "::get_c(p_t const & p, q_t const & q) const {\n";
+        f << "// " << mName << "Solver\n";
+        f << "#include \"" << mName << "/" << mName << "Solver.hpp\"\n";
+        f << "\n";
+
+        f << mName << "Solver::c_t\n";
+        f << mName << "Solver::get_c(p_t const & p, q_t const & q) const {\n";
 
         for(int i = 0; i < 6*N; ++i)
             f << "    double " << ps[i] << " = p(" << i << ");\n";
@@ -217,8 +220,8 @@ public:
         /********************************************************************************/
         /********************************************************************************/
 
-        f << mName << "::cextra_t\n";
-        f << mName << "::get_cextra(p_t const & p, q_t const & q) const {\n";
+        f << mName << "Solver::cextra_t\n";
+        f << mName << "Solver::get_cextra(p_t const & p, q_t const & q) const {\n";
 
         for(int i = 0; i < 6*N; ++i)
             f << "    double " << ps[i] << " = p(" << i << ");\n";
@@ -243,8 +246,8 @@ public:
         /********************************************************************************/
         /********************************************************************************/
 
-        f << mName << "::d1cextra_t\n";
-        f << mName << "::get_d1cextra(p_t const & p, q_t const & q) const {\n";
+        f << mName << "Solver::d1cextra_t\n";
+        f << mName << "Solver::get_d1cextra(p_t const & p, q_t const & q) const {\n";
 
         for(int i = 0; i < 6*N; ++i)
             f << "    double " << ps[i] << " = p(" << i << ");\n";
@@ -277,8 +280,8 @@ public:
         /********************************************************************************/
         /********************************************************************************/
 
-        f << mName << "::d2cextra_t\n";
-        f << mName << "::get_d2cextra(p_t const & p, q_t const & q) const {\n";
+        f << mName << "Solver::d2cextra_t\n";
+        f << mName << "Solver::get_d2cextra(p_t const & p, q_t const & q) const {\n";
 
         for(int i = 0; i < 6*N; ++i)
             f << "    double " << ps[i] << " = p(" << i << ");\n";
@@ -311,8 +314,8 @@ public:
         /********************************************************************************/
         /********************************************************************************/
 
-        f << mName << "::d1ck_t\n";
-        f << mName << "::get_d1ck(p_t const & p, q_t const & q) const {\n";
+        f << mName << "Solver::d1ck_t\n";
+        f << mName << "Solver::get_d1ck(p_t const & p, q_t const & q) const {\n";
 
         for(int i = 0; i < 6*N; ++i)
             f << "    double " << ps[i] << " = p(" << i << ");\n";
@@ -341,8 +344,8 @@ public:
         /********************************************************************************/
         /********************************************************************************/
 
-        f << mName << "::d1c_t\n";
-        f << mName << "::get_d1c(p_t const & p, q_t const & q) const {\n";
+        f << mName << "Solver::d1c_t\n";
+        f << mName << "Solver::get_d1c(p_t const & p, q_t const & q) const {\n";
 
         for(int i = 0; i < 6*N; ++i)
             f << "    double " << ps[i] << " = p(" << i << ");\n";
@@ -371,8 +374,8 @@ public:
         /********************************************************************************/
         /********************************************************************************/
 
-        f << mName << "::d2c_t\n";
-        f << mName << "::get_d2c(p_t const & p, q_t const & q) const {\n";
+        f << mName << "Solver::d2c_t\n";
+        f << mName << "Solver::get_d2c(p_t const & p, q_t const & q) const {\n";
 
         for(int i = 0; i < 6*N; ++i)
             f << "    double " << ps[i] << " = p(" << i << ");\n";
@@ -402,8 +405,8 @@ public:
         /********************************************************************************/
         /********************************************************************************/
 
-        f << mName << "::ddtd1ck_t\n";
-        f << mName << "::get_ddtd1ck(\n";
+        f << mName << "Solver::ddtd1ck_t\n";
+        f << mName << "Solver::get_ddtd1ck(\n";
         f << "    p_t const & p\n";
         f << "    ,\n";
         f << "    ddtp_t const & ddtp\n";
@@ -476,8 +479,8 @@ public:
         /********************************************************************************/
         /********************************************************************************/
 
-        f << mName << "::ddtd2c_t\n";
-        f << mName << "::get_ddtd2c(\n";
+        f << mName << "Solver::ddtd2c_t\n";
+        f << mName << "Solver::get_ddtd2c(\n";
         f << "    p_t const & p\n";
         f << "    ,\n";
         f << "    ddtp_t const & ddtp\n";
@@ -557,7 +560,7 @@ private:
      */
     std::string mName;
 
-    std::array<sop::tuple_holonomic_constraint_t, M1> const & mholonomic_constraints;
+    std::array<sop::tuple_holonomic_constraint_t, M1> mholonomic_constraints;
     std::array<sop::tuple_holonomic_constraint_with_contact_t, M2> mholonomic_constraint_with_contact;
 
     // m constraints

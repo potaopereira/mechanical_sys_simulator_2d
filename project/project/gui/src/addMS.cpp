@@ -1,22 +1,43 @@
 #include <private/addMS.h>
 
+// // ExampleMSViewer
+// #include <ExampleMS/ExampleMSViewer.hpp>
 
-// #include <pendulum/pendulum.hpp>
+// BallOnSlopeViewer
+#include <BallOnSlope/BallOnSlopeViewer.hpp>
 
-// // #include <pendulum/ball_on_parabola.hpp>
-// #include <pendulum/ball_on_parabola_no_sliding.hpp>
+// SlidingBallOnSlopeViewer
+#include <SlidingBallOnSlope/SlidingBallOnSlopeViewer.hpp>
 
+// BallOnCircleViewer
+#include <BallOnCircle/BallOnCircleViewer.hpp>
 
-// ExampleMSViewer
-#include <examplems/examplemsviewer.hpp>
+// SlidingBallOnCircleViewer
+#include <SlidingBallOnCircle/SlidingBallOnCircleViewer.hpp>
+
+// BarPendulumViewer
+#include <BarPendulum/BarPendulumViewer.hpp>
 
 IMS2D*
 MSFactory::create(
     MSType type
 ){
     switch(type){
-        case(MSType::ExampleMST):
-            return new ExampleMSWithViewer();
+        case(MSType::BallOnSlopeT):
+            return new BallOnSlopeViewer();
+        case(MSType::SlidingBallOnSlopeT):
+            return new SlidingBallOnSlopeViewer();
+
+        case(MSType::BallOnCircleT):
+            return new BallOnCircleViewer();
+        case(MSType::SlidingBallOnCircleT):
+            return new SlidingBallOnCircleViewer();
+
+        case(MSType::BarPendulumT):
+            return new BarPendulumViewer();
+        
+        // case(MSType::ExampleMST):
+        //     return new ExampleMSViewer();
         // case(MSType::PendulumT):
         //     return new Pendulum();
         // case(MSType::BallOnParabolaNoSlidingT):
@@ -29,9 +50,34 @@ MSFactory::create(
 std::vector<std::pair<std::string, MSFactory::MSType>>
 AddMS::mList = {
     make_pair(
-        std::string("ExampleMST"),
-        MSFactory::MSType::ExampleMST
+        std::string("BallOnSlopeT"),
+        MSFactory::MSType::BallOnSlopeT
     )
+    ,
+    make_pair(
+        std::string("SlidingBallOnSlopeT"),
+        MSFactory::MSType::SlidingBallOnSlopeT
+    )
+    ,
+    make_pair(
+        std::string("BallOnCircleT"),
+        MSFactory::MSType::BallOnCircleT
+    )
+    ,
+    make_pair(
+        std::string("SlidingBallOnCircleT"),
+        MSFactory::MSType::SlidingBallOnCircleT
+    )
+    ,
+    make_pair(
+        std::string("BarPendulumT"),
+        MSFactory::MSType::BarPendulumT
+    )
+    // ,
+    // make_pair(
+    //     std::string("ExampleMST"),
+    //     MSFactory::MSType::ExampleMST
+    // )
     // make_pair(
     //     std::string("Pendulum"),
     //     MSFactory::MSType::PendulumT

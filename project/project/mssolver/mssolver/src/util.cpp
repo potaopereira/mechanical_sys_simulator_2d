@@ -50,14 +50,14 @@ get_constraint_with_contact(tuple_holonomic_constraint_with_contact_t t){
 
     vec_t dboundary_inertial = rotate(p.ap, dboundary);
 
-    std::cout << p.lp[0] << std::endl;
-    std::cout << q[0] << std::endl;
-    std::cout << dconstraint[0] << std::endl;
-    std::cout << dconstraint[1] << std::endl;
-    std::cout << dboundary[0] << std::endl;
-    std::cout << dboundary[1] << std::endl;
-    std::cout << dboundary_inertial[0] << std::endl;
-    std::cout << dboundary_inertial[1] << std::endl;
+    // std::cout << p.lp[0] << std::endl;
+    // std::cout << q[0] << std::endl;
+    // std::cout << dconstraint[0] << std::endl;
+    // std::cout << dconstraint[1] << std::endl;
+    // std::cout << dboundary[0] << std::endl;
+    // std::cout << dboundary[1] << std::endl;
+    // std::cout << dboundary_inertial[0] << std::endl;
+    // std::cout << dboundary_inertial[1] << std::endl;
 
     constraint_with_contact_t constraint_with_contact = {
         .i = t.rigid_body
@@ -308,6 +308,46 @@ Symbolic inner(
 }
 
 Symbolic
+pc_dist2point(
+    lp_t const & lp1
+    ,
+    lp_t const & lp2
+    ,
+    std::vector<Symbolic> const & parameters
+){
+    if(parameters.size() != 1)
+        throw std::invalid_argument("distance position requires 1 parameters: a distance squared.");
+
+    return inner(lp1, lp2) - parameters[0];
+}
+
+Symbolic
+hc_dist2point(
+    std::vector<int> const & rigid_bodies
+    ,
+    std::vector<Symbolic> const & parameters // = std::vector<Symbolic>({Symbolic("p0"), Symbolic("p1"), Symbolic("r0"), Symbolic("r1"), Symbolic("dsquared")})
+){
+    if(rigid_bodies.size()!=1)
+        throw std::invalid_argument("Distance to point applies to a single rigid body.");
+
+    if(parameters.size()!=5)
+        throw std::invalid_argument("Distance to point  requires 5 parameters: point, relative point, and distance squared.");
+
+    p_t p = getP(rigid_bodies[0]);
+    lp_t point_body;
+    point_body[0] = parameters[2];
+    point_body[1] = parameters[3];
+    lp_t point_inertial = getPoint(p, point_body);
+
+    lp_t point_fixed;
+    point_fixed[0] = parameters[0];
+    point_fixed[1] = parameters[1];
+
+    return pc_dist2point(point_inertial, point_fixed, std::vector<Symbolic>({parameters[4]}));
+}
+
+
+Symbolic
 pc_slope(
     lp_t const & lp
     ,
@@ -334,7 +374,7 @@ hc_slope(
     ,
     std::vector<Symbolic> const & parameters
 ){
-    if(parameters.size()!=1){
+    if(rigid_bodies.size()!=1){
         throw std::invalid_argument("Slope constraint applies to a single rigid body.");
     }
     else{
@@ -367,7 +407,7 @@ hc_parabola(
     ,
     std::vector<Symbolic> const & parameters
 ){
-    if(parameters.size()!=1){
+    if(rigid_bodies.size()!=1){
         throw std::invalid_argument("Slope constraint applies to a single rigid body.");
     }
     else{
@@ -401,7 +441,7 @@ hc_ellipse(
     ,
     std::vector<Symbolic> const & parameters
 ){
-    if(parameters.size()!=1){
+    if(rigid_bodies.size()!=1){
         throw std::invalid_argument("Ellipse constraint applies to a single rigid body.");
     }
     else{

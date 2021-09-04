@@ -21,7 +21,12 @@
 class MSFactory {
 public:
     enum class MSType {
-        ExampleMST
+        BallOnSlopeT,
+        SlidingBallOnSlopeT,
+        BallOnCircleT,
+        SlidingBallOnCircleT,
+        BarPendulumT
+        // ExampleMST,
         // PendulumT,
         // BallOnParabolaNoSlidingT
     };

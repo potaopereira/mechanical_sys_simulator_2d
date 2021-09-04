@@ -53,6 +53,26 @@ Symbolic get_holonomic_constraint(tuple_holonomic_constraint_t t);
 /******************************************************************************/
 /* holonomic constraints                                                      */
 /******************************************************************************/
+/*
+pc_*** = point constraints
+hc_*** = holonomic contraint
+*/
+
+Symbolic
+pc_dist2point(
+    lp_t const & lp1
+    ,
+    lp_t const & lp2
+    ,
+    std::vector<Symbolic> const & parameters = std::vector<Symbolic>({Symbolic("dsquared")})
+);
+
+Symbolic
+hc_dist2point(
+    std::vector<int> const & rigid_bodies
+    ,
+    std::vector<Symbolic> const & parameters = std::vector<Symbolic>({Symbolic("p0"), Symbolic("p1"), Symbolic("r0"), Symbolic("r1"), Symbolic("dsquared")})
+);
 
 Symbolic
 pc_slope(

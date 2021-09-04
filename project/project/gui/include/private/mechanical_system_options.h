@@ -80,6 +80,18 @@ public slots:
         bool checked
     );
 
+    void changeRelativePoint(
+
+    );
+
+    void showRelativePoint(
+        bool checked
+    );
+
+    void showRelativePointVelocity(
+        bool checked
+    );
+
 private:
     IMS2D* mIMS2D;
     int mBodyId;
@@ -91,8 +103,13 @@ private:
     std::array<QLineEdit, 3> mVelocity;
     QCheckBox mShowForce;
     std::array<QLineEdit, 3> mForce;
+
+    std::array<double, 2> mRelativePoint;
     std::array<QLineEdit, 3> mRelativeInput;
-    std::array<QLineEdit, 3> mRelativeVelocity;
+    QCheckBox mShowRelativePoint;
+    std::array<QLineEdit, 3> mRelativePointVelocity;
+    QCheckBox mShowRelativePointVelocity;
+
     QCheckBox mShowBoundary;
     ColorButton mColorButton;
     std::map<std::string, QLineEdit*> mParamLE;

@@ -15,6 +15,8 @@ mIMS2D(ms)
 mBodyId(bodyId)
 ,
 mQGridLayout()
+,
+mRelativePoint(std::array<double, 2>({{0,0}}))
 {
 
     mQGridLayout.addWidget(new QLabel( ms->getName(mBodyId).c_str()), 0, 0);
@@ -90,15 +92,36 @@ mQGridLayout()
 
     ++k;
     mQGridLayout.addWidget(new QLabel("point"), k, 1);
-    mQGridLayout.addWidget(&mRelativeInput[0], k, 2);
-    mQGridLayout.addWidget(&mRelativeInput[1], k, 3);
-    // mQGridLayout.addWidget(mRelative[2], k, 4);
+    mQGridLayout.addWidget(&mShowRelativePoint, k, 2);
+    mQGridLayout.addWidget(&mRelativeInput[0], k, 3);
+    mQGridLayout.addWidget(&mRelativeInput[1], k, 4);
+    // mQGridLayout.addWidget(mRelative[2], k, 5);
+    for(int i = 0; i < 2; ++i)
+        connect(
+            &mRelativeInput[i], &QLineEdit::returnPressed,
+            this, &RBOptions::changeRelativePoint
+        );
+    connect(
+        &mShowRelativePoint, &QCheckBox::toggled,
+        this, &RBOptions::showRelativePoint
+    );
+    // by default, relative point is not shown
+    mShowRelativePoint.setChecked(false);
+    showRelativePoint(false);
 
     ++k;
     mQGridLayout.addWidget(new QLabel("point velocity"), k, 1);
-    mQGridLayout.addWidget(&mRelativeVelocity[0], k, 2);
-    mQGridLayout.addWidget(&mRelativeVelocity[1], k, 3);
-    // mQGridLayout.addWidget(mRelative[2], k, 4);
+    mQGridLayout.addWidget(&mShowRelativePointVelocity, k, 2);
+    mQGridLayout.addWidget(&mRelativePointVelocity[0], k, 3);
+    mQGridLayout.addWidget(&mRelativePointVelocity[1], k, 4);
+    // mQGridLayout.addWidget(mRelative[2], k, 5);
+    connect(
+        &mShowRelativePointVelocity, &QCheckBox::toggled,
+        this, &RBOptions::showRelativePointVelocity
+    );
+    // by default, relative point velocity is not shown
+    mShowRelativePointVelocity.setChecked(false);
+    showRelativePointVelocity(false);
 
     ++k;
     mQGridLayout.addWidget(new QLabel("show boundary"), k, 1);
@@ -164,7 +187,7 @@ RBOptions::set(
     std::array<double, 3> p = mIMS2D->getPosition(step, mBodyId);
     std::array<double, 3> v = mIMS2D->getVelocity(step, mBodyId);
     std::array<double, 3> f = mIMS2D->getForce(step, mBodyId);
-    std::array<double, 2> q = mIMS2D->getVelocityOfPoint(step, mBodyId, std::array<double,2>({{0,0}}));
+    std::array<double, 2> q = mIMS2D->getVelocityOfPoint(step, mBodyId, mRelativePoint);
 
     for(int j = 0; j < 3; ++j){
         mPosition[j].setText(QString::number(p[j], 'g', 3));
@@ -172,8 +195,8 @@ RBOptions::set(
         mForce[j].setText(QString::number(f[j], 'g', 3));
     }
 
-    mRelativeVelocity[0].setText(QString::number(q[0], 'g', 3));
-    mRelativeVelocity[1].setText(QString::number(q[1], 'g', 3));
+    mRelativePointVelocity[0].setText(QString::number(q[0], 'g', 3));
+    mRelativePointVelocity[1].setText(QString::number(q[1], 'g', 3));
 }
 
 void
@@ -233,6 +256,35 @@ RBOptions::showForce(
     mIMS2D->showForce(mBodyId, checked);
     // mIMS2D->showForce(mBodyId, mShowForce.isChecked());
 }
+
+
+void
+RBOptions::changeRelativePoint(
+){
+    mRelativePoint = std::array<double, 2>(
+        {{
+            mRelativeInput[0].text().toFloat(),
+            mRelativeInput[1].text().toFloat()
+        }}
+    );
+}
+
+void
+RBOptions::showRelativePoint(
+    bool //checked
+){
+    // @todo
+    // mIMS2D->showRelativePoint(mBodyId, checked, mRelativePoint);
+}
+
+void
+RBOptions::showRelativePointVelocity(
+    bool //checked
+){
+    // @todo
+    // mIMS2D->showRelativePointVelocity(mBodyId, checked, mRelativePoint);
+}
+
 
 MSOptions::MSOptions(
     IMS2D* ms,

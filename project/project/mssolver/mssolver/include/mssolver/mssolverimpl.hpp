@@ -614,8 +614,8 @@ public:
             };
         return std::array<double, 2>(
             {{
-                v[0] + omega*(-r[0][1]*relative_position[0] + r[0][0]*relative_position[1]),
-                v[1] + omega*(-r[1][1]*relative_position[0] + r[1][0]*relative_position[1])
+                v[0] + omega*(+r[0][1]*relative_position[0] - r[0][0]*relative_position[1]),
+                v[1] + omega*(+r[1][1]*relative_position[0] - r[1][0]*relative_position[1])
             }}
         );
     }
@@ -790,11 +790,13 @@ public:
     /**
      * @brief Get the internal forces applied to the mechanical system
      * 
+     * @param time Time instant
      * @param state State of the mechanical system
      * @return f_t Force
      */
     f_t
     getInternalForces(
+        double time,
         state_t const & state
     ){
 
@@ -842,7 +844,7 @@ public:
         Eigen::Matrix<double, M1+M2+M3, M1+M2+M3> to_invert;
         to_invert = NS*mIinv*NS.transpose();
 
-        f_t force_input = getForce(state);
+        f_t force_input = getForce(time, state);
 
         // acceleration no constraints
         ddtv_t free_acceleration = mIinv*force_input;
@@ -862,12 +864,14 @@ public:
      * @brief Get the force applied on the ith rigid body
      * 
      * @param k Rigid body id
+     * @param time Time instant
      * @return IMS2DSolver::rbf_t Force applied on rigid body
      */
     virtual
     IMS2DSolver::rbf_t
-    getForce(
-        int k
+    getForceRB(
+        int k,
+        double time
     ){
         IMS2DSolver::rbf_t f = IMS2DSolver::rbf_t::Zero();
         f << 0, -10, 0; // kg / s / s
@@ -877,16 +881,18 @@ public:
     /**
      * @brief Get the force applied on the mechanical system
      * 
+     * @param time Time instant
      * @param state State of the mechanical system
      * @return f_t Force applied on the mechanical system
      */
     virtual
     f_t getForce(
+        double time,
         state_t const & state
     ){
         f_t f;
         for(int i = 0; i < N; ++i)
-            f.segment(3*i, 3) = getForce(i);
+            f.segment(3*i, 3) = getForceRB(i, time);
         return f;
     }
 
@@ -918,10 +924,12 @@ public:
     /**
      * @brief Get the state time derivative
      * 
+     * @param time Time instant
      * @param state State of the mechanical system
      * @return ddtstate_t Time derivative of the state
      */
     ddtstate_t getStateDot(
+        double time,
         state_t const & state
     ){
 
@@ -1036,7 +1044,7 @@ public:
         Eigen::Matrix<double, M1+M2+M3, M1+M2+M3> to_invert;
         to_invert = NS*mIinv*NS.transpose();
 
-        f_t f = getForce(state);
+        f_t f = getForce(time, state);
         // acceleration no constraints
         ddtv_t free = mIinv*f;
 
@@ -1605,14 +1613,14 @@ public:
         MS2DSolverImpl<N, M1, M2, M3> *p = (MS2DSolverImpl<N, M1, M2, M3> *) params;
 
         /* this does not work:
-        p->getStateDot(state_t(y)) is a temporary object
-        and the operation 'f = p->getStateDot(state_t(y)).data()' does not copy anything
+        p->getStateDot(t, state_t(y)) is a temporary object
+        and the operation 'f = p->getStateDot(t, state_t(y)).data()' does not copy anything
         so f will be pointing to just zeros,
         which is the default initialization
         */
         // f = p->getStateDot(state_t(y)).data();
 
-        state_t x = p->getStateDot(state_t(y));
+        state_t x = p->getStateDot(t, state_t(y));
         for(int i = 0; i < (6+3)*N + 2*M2; ++i)
             f[i] = x(i);
 
@@ -1670,7 +1678,7 @@ public:
 
             double ti = time_initial + (i + 1) * time_step;
             int status = gsl_odeiv2_driver_apply(d, &t, ti, y);
-            f_t forces = getInternalForces(state_t(y));
+            f_t forces = getInternalForces(ti, state_t(y));
 
             for(int j = 0; j < (6+3)*N + 2*M2; ++j)
                 yall[i][j] = y[j];

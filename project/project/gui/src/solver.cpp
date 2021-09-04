@@ -44,8 +44,8 @@ SolverThread::run() {
     // Timers cannot be stopped from another thread
     // mQTimer.stop();
 
-    emit setProgress(mCurrentStep);
-    emit resultReady(QString("result ready"));
+    // emit setProgress(mCurrentStep);
+    // emit resultReady(QString("result ready"));
 }
 
 void

@@ -10,13 +10,13 @@ BarPendulumSymbImpl(
             {
                 .constraint = &sop::hc_dist2point,
                 .rigid_bodies = std::vector<int>({0}),
-                .parameters = std::vector<Symbolic>({-100, +150, -Symbolic("length1_bar"), 0, Symbolic("arm_1_squared")}),
+                .parameters = std::vector<Symbolic>({Symbolic("p1[0]"), Symbolic("p1[1]"), -Symbolic("length1_bar"), 0, Symbolic("arm_1_squared")}),
             }
             ,
             {
                 .constraint = &sop::hc_dist2point,
                 .rigid_bodies = std::vector<int>({0}),
-                .parameters = std::vector<Symbolic>({+100, +150, +Symbolic("length2_bar"), 0, Symbolic("arm_2_squared")}),
+                .parameters = std::vector<Symbolic>({Symbolic("p2[0]"), Symbolic("p2[1]"), +Symbolic("length2_bar"), 0, Symbolic("arm_2_squared")}),
             }
         }}
     )
@@ -26,23 +26,43 @@ BarPendulumSymbImpl(
 ,
 IMRB2DPARAM()
 {
-    length1_bar = +100;
+    length1_bar = +400;
     mParamList["length1_bar"] = std::make_tuple(
-        &length1_bar, 0, +200, "d1", "distance to contact point 1"
+        &length1_bar, 0, +800, "d1", "distance to contact point 1"
     );
 
-    length2_bar = +100;
+    length2_bar = +400;
     mParamList["length2_bar"] = std::make_tuple(
-        &length2_bar, 0, +200, "d2", "distance to contact point 2"
+        &length2_bar, 0, +8000, "d2", "distance to contact point 2"
     );
 
-    arm_1_squared = 150*150;
+    arm_1_squared = 500*500;
     mParamList["arm_1_squared"] = std::make_tuple(
-        &arm_1_squared, 0, 170*170, "l1", "distance between contact point 1 and fixed point 1"
+        &arm_1_squared, 0, 700*700, "l1", "distance squared between contact point 1 and fixed point 1"
     );
 
-    arm_2_squared = +150*150;
+    arm_2_squared = +500*500;
     mParamList["arm_2_squared"] = std::make_tuple(
-        &arm_2_squared, 0, 170*170, "l2", "distance between contact point 2 and fixed point 2"
+        &arm_2_squared, 0, 700*700, "l2", "distance squared between contact point 2 and fixed point 2"
+    );
+
+    p1[0] = -420;
+    mParamList["p1[0]"] = std::make_tuple(
+        &p1[0], -600, 0, "p1 x", "point 1 x coordinate"
+    );
+
+    p1[1] = 500;
+    mParamList["p1[1]"] = std::make_tuple(
+        &p1[1], -600, 0, "p1 y", "point 1 y coordinate"
+    );
+
+    p2[0] = +420;
+    mParamList["p2[0]"] = std::make_tuple(
+        &p2[0], -600, 0, "p2 x", "point 2 x coordinate"
+    );
+
+    p2[1] = 500;
+    mParamList["p2[1]"] = std::make_tuple(
+        &p2[1], -600, 0, "p2 y", "point 2 y coordinate"
     );
 }

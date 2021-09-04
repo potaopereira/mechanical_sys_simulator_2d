@@ -14,6 +14,7 @@ IMS2DViewer::showAtStep(
             mSolver->getBodyVectorsPlot(step, body_id),
             body_id
         );
+        showExtraAtStep(step);
     }
 }
 

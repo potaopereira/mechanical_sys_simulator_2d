@@ -25,6 +25,8 @@ public:
     };
 
     // do not make this private
+    float p1[2];
+    float p2[2];
     float length1_bar;
     float length2_bar;
     float arm_1_squared;

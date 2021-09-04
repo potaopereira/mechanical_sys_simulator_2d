@@ -318,7 +318,10 @@ pc_dist2point(
     if(parameters.size() != 1)
         throw std::invalid_argument("distance position requires 1 parameters: a distance squared.");
 
-    return inner(lp1, lp2) - parameters[0];
+    lp_t dd;
+    dd[0] = lp1[0] - lp2[0];
+    dd[1] = lp1[1] - lp2[1];
+    return inner(dd, dd) - parameters[0];
 }
 
 Symbolic

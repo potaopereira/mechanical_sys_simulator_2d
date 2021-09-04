@@ -20,6 +20,14 @@ public:
     BarPendulumViewer();
     virtual void reset();
 
+    /**
+     * @brief use this instead of IMS2DViewer::showExtraAtStep(int)
+     * 
+     */
+    virtual void showExtraAtStep(
+        int step
+    );
+
 private:
     QGraphicsLineItem* point2contact1;
     QGraphicsLineItem* point2contact2;

@@ -31,6 +31,13 @@ public:
         int step
     );
 
+    virtual
+    void showExtraAtStep(
+        int /*step*/
+    ){
+        // nothing: overwrite this method to plot more stuff specific to each mechanical system
+    }
+
     void show(
         int step,
         void (IMS2DViewer::*show_ptr)(int step)

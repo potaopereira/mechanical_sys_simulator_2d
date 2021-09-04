@@ -95,6 +95,10 @@ mSolversUpdateTimer()
         mGlobalOptions, &GlobalOptions::startSolver,
         this, &MultipleMSView::solve
     );
+    connect(
+        mGlobalOptions, &GlobalOptions::plotFactorsChanged,
+        this, &MultipleMSView::plotFactorsChanged
+    );
     /*
     addTab(QWidget *page, const QString &label)
     Adds a tab with the given page and label to the tab widget
@@ -216,4 +220,13 @@ MultipleMSView::solve(
     }
 
     */
+}
+
+void MultipleMSView::plotFactorsChanged(
+    IMS2D::plot_factors_t plot_factors
+){
+    for(std::size_t i = 0; i < mList.size(); ++i){
+        IMS2D* p = std::get<0>(mList[i]);
+        p->setPlotFactors(plot_factors);
+    }
 }

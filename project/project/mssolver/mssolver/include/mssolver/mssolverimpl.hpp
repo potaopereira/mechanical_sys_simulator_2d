@@ -148,6 +148,10 @@ public:
     mIinv(Eigen::Matrix<double, 3*N, 3*N>::Zero())
     ,
     mListWithContact(std::list<int>(0))
+    ,
+    mVelocityPlotFactor(std::array<double,2>({{1,1}}))
+    ,
+    mForcePlotFactor(std::array<double,2>({{1,1}}))
     {
         mListWithContact = ptr->getListOrderedWithContact();
 
@@ -364,6 +368,31 @@ public:
     }
 
     /**
+     * @brief Set the linear and angular velocity factors, used for plotting purposes
+     * 
+     * @param factors Linear and angular factors
+     */
+    virtual
+    void
+    setVelocityPlotFactor(
+        std::array<double, 2> factors
+    ){
+        mVelocityPlotFactor = factors;
+    }
+
+    /**
+     * @brief Get the linear and angular velocity factors
+     * 
+     */
+    virtual
+    std::array<double, 2>
+    getVelocityPlotFactor(
+        // 
+    ) const {
+        return mVelocityPlotFactor;
+    }
+
+    /**
      * @brief Get the velocity (for plotting purposes) of a rigid body from the mechanical system
      * 
      * @param solution Pointer to solution coming from solverImplementation
@@ -375,7 +404,38 @@ public:
         double* solution,
         int k // rigid body number
     ) const {
-        return rbv_t(&solution[6*N + 2*M2 + 3*k]);
+        // return rbv_t(&solution[6*N + 2*M2 + 3*k]);
+        rbv_t out;
+        out << 
+        solution[6*N + 2*M2 + 3*k + 0]*mVelocityPlotFactor[0], // linear
+        solution[6*N + 2*M2 + 3*k + 1]*mVelocityPlotFactor[0], // linear
+        solution[6*N + 2*M2 + 3*k + 2]*mVelocityPlotFactor[1]; // angular
+        return out;
+    }
+
+    /**
+     * @brief Set the linear and angular force factors, used for plotting purposes
+     * 
+     * @param factors Linear and angular factors
+     */
+    virtual
+    void
+    setForcePlotFactor(
+        std::array<double, 2> factors
+    ){
+        mForcePlotFactor = factors;
+    }
+
+    /**
+     * @brief Get the linear and angular force factors
+     * 
+     */
+    virtual
+    std::array<double, 2>
+    getForcePlotFactor(
+        // 
+    ) const {
+        return mForcePlotFactor;
     }
 
     /**
@@ -390,7 +450,13 @@ public:
         double* solution,
         int k // rigid body number
     ) const {
-        return rbf_t(&solution[6*N + 2*M2 + 3*N + 3*k]);
+        // return rbf_t(&solution[6*N + 2*M2 + 3*N + 3*k]);
+        rbv_t out;
+        out << 
+        solution[6*N + 2*M2 + 3*N + 3*k + 0]*mForcePlotFactor[0], // linear
+        solution[6*N + 2*M2 + 3*N + 3*k + 1]*mForcePlotFactor[0], // linear
+        solution[6*N + 2*M2 + 3*N + 3*k + 2]*mForcePlotFactor[1]; // angular
+        return out;
     }
 
     /**
@@ -1656,6 +1722,18 @@ private:
      * 
      */
     std::list<int> mListWithContact;
+
+    /**
+     * @brief Linear and angular factors for plotting linear and angular velocity
+     * 
+     */
+    std::array<double, 2> mVelocityPlotFactor;
+
+    /**
+     * @brief Linear and angular factors for plotting linear and angular force
+     * 
+     */
+    std::array<double, 2> mForcePlotFactor;
 
     /**
      * @brief Validate rigid body id and throw exception if it is not valid

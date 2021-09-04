@@ -30,6 +30,11 @@ mMax(max >= min ? max : min)
     mLayout.addWidget(&mLabel);
     mLayout.addWidget(&mEditor);
     setLayout(&mLayout);
+
+    connect(
+        &mEditor, &QLineEdit::returnPressed,
+        this, &GlobalOptionFloat::valueChanged
+    );
 }
 
 float
@@ -65,6 +70,11 @@ mMax(max >= min ? max : min)
     mLayout.addWidget(&mLabel);
     mLayout.addWidget(&mEditor);
     setLayout(&mLayout);
+
+    connect(
+        &mEditor, &QLineEdit::returnPressed,
+        this, &GlobalOptionInt::valueChanged
+    );
 }
 
 int
@@ -107,17 +117,71 @@ mDeltaTime(
     getWDefault<float>(mNode["delta_time"]), // initial
     std::string("Time steps in seconds, when computing solution")
 )
+,
+mSetLinearVelocityPlotFactor(
+    std::string("x Linear vel"),
+    0, // min
+    1000, // max
+    1, // initial
+    std::string("Linear velocity factor")
+)
+,
+mSetAngularVelocityPlotFactor(
+    std::string("x Angular vel"),
+    0, // min
+    1000, // max
+    1, // initial
+    std::string("Angular velocity factor")
+)
+,
+mSetLinearForcePlotFactor(
+    std::string("x Linear force"),
+    0, // min
+    1000, // max
+    1, // initial
+    std::string("Linear force factor")
+)
+,
+mSetAngularForcePlotFactor(
+    std::string("x Angular force"),
+    0, // min
+    1000, // max
+    1, // initial
+    std::string("Angular force factor")
+)
 {
     mLayout.addWidget(&mSolve);
     mLayout.addWidget(&mInitialTime);
     mLayout.addWidget(&mFinalTime);
     mLayout.addWidget(&mDeltaTime);
+    mLayout.addWidget(&mSetLinearVelocityPlotFactor);
+    mLayout.addWidget(&mSetAngularVelocityPlotFactor);
+    mLayout.addWidget(&mSetLinearForcePlotFactor);
+    mLayout.addWidget(&mSetAngularForcePlotFactor);
     setLayout(&mLayout);
 
     connect(
         &mSolve, &QPushButton::pressed,
         this, &GlobalOptions::requestSolver
     );
+
+    connect(
+        &mSetLinearVelocityPlotFactor, &GlobalOptionFloat::valueChanged,
+        this, &GlobalOptions::updatePlotFactors
+    );
+    connect(
+        &mSetAngularVelocityPlotFactor, &GlobalOptionFloat::valueChanged,
+        this, &GlobalOptions::updatePlotFactors
+    );
+    connect(
+        &mSetLinearForcePlotFactor, &GlobalOptionFloat::valueChanged,
+        this, &GlobalOptions::updatePlotFactors
+    );
+    connect(
+        &mSetAngularForcePlotFactor, &GlobalOptionFloat::valueChanged,
+        this, &GlobalOptions::updatePlotFactors
+    );
+
 }
 
 YAML::Node
@@ -152,4 +216,16 @@ GlobalOptions::requestSolver(
             );
         // }
     }
+}
+
+void
+GlobalOptions::updatePlotFactors(
+
+){
+    emit plotFactorsChanged(
+        std::make_tuple(
+            std::array<double, 2>({{mSetLinearVelocityPlotFactor.getValue(),mSetAngularVelocityPlotFactor.getValue()}}),
+            std::array<double, 2>({{mSetLinearForcePlotFactor.getValue(),mSetAngularForcePlotFactor.getValue()}})
+        )
+    );
 }

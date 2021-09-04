@@ -44,6 +44,8 @@ public:
         QWidget* parent = nullptr
     );
     float getValue() const;
+signals:
+    void valueChanged();
 private:
     QLabel mLabel;
     QLineEdit mEditor;
@@ -66,6 +68,8 @@ public:
         QWidget* parent = nullptr
     );
     int getValue() const;
+signals:
+    void valueChanged();
 private:
     QLabel mLabel;
     QLineEdit mEditor;
@@ -104,10 +108,18 @@ public:
 public slots:
     void requestSolver();
 
+    void updatePlotFactors();
+
 signals:
     void startSolver(
         solver_options_t const &
     );
+
+    void
+    plotFactorsChanged(
+        IMS2D::plot_factors_t
+    );
+
 
 private:
     YAML::Node mNode;
@@ -115,6 +127,10 @@ private:
     GlobalOptionFloat mInitialTime;
     GlobalOptionFloat mFinalTime;
     GlobalOptionFloat mDeltaTime;
+    GlobalOptionFloat mSetLinearVelocityPlotFactor;
+    GlobalOptionFloat mSetAngularVelocityPlotFactor;
+    GlobalOptionFloat mSetLinearForcePlotFactor;
+    GlobalOptionFloat mSetAngularForcePlotFactor;
     QVBoxLayout mLayout;
 
     // should be made static

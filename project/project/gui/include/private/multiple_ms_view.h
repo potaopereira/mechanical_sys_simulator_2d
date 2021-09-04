@@ -93,6 +93,10 @@ public slots:
         GlobalOptions::solver_options_t const & solver_options
     );
 
+    void plotFactorsChanged(
+        IMS2D::plot_factors_t
+    );
+
 private:
     YAML::Node mNode;
     QVBoxLayout mQVBoxLayout;

@@ -37,18 +37,18 @@ mInertialVectors(std::vector<QGraphicsLineItem*>({}))
 {
     // angular velocity: purple
     mRBView->addVector(QPen(QColor(128, 0, 128), 3, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-    // angular force: orange
-    mRBView->addVector(QPen(QColor(255, 165, 0), 3, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+    // angular force: purple
+    mRBView->addVector(QPen(QColor(128, 0, 128), 3, Qt::DashDotLine, Qt::RoundCap, Qt::RoundJoin));
     
     for(int unsigned i = 0; i < nBodyVectors; ++i)
         mRBView->addVector();
 
     addToGroup(mRBView);
 
-    // linear velocity: purple
-    addVector(QPen(QColor(128, 0, 128), 3, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-    // linear force: orange
+    // linear velocity: orange
     addVector(QPen(QColor(255, 165, 0), 3, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+    // linear force: orange
+    addVector(QPen(QColor(255, 165, 0), 3, Qt::DashDotLine, Qt::RoundCap, Qt::RoundJoin));
 
     for(int unsigned i = 0; i < nInertialVectors; ++i)
         addVector();

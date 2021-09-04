@@ -103,10 +103,52 @@ public:
         int N // rigid body number
     ) const = 0;
 
+    /**
+     * @brief Set the linear and angular velocity factors, used for plotting purposes
+     * 
+     * @param factors Linear and angular factors
+     */
+    virtual
+    void
+    setVelocityPlotFactor(
+        std::array<double, 2> factors
+    ) = 0;
+
+    /**
+     * @brief Get the linear and angular velocity factors
+     * 
+     */
+    virtual
+    std::array<double, 2>
+    getVelocityPlotFactor(
+        // 
+    ) const = 0;
+
     virtual
     rbv_t getVelocityPlot(
         double* solution,
         int N // rigid body number
+    ) const = 0;
+
+    /**
+     * @brief Set the linear and angular force factors, used for plotting purposes
+     * 
+     * @param factors Linear and angular factors
+     */
+    virtual
+    void
+    setForcePlotFactor(
+        std::array<double, 2> factors
+    ) = 0;
+
+    /**
+     * @brief Get the linear and angular force factors
+     * 
+     */
+    virtual
+    std::array<double, 2>
+    getForcePlotFactor(
+        // 
     ) const = 0;
 
     virtual

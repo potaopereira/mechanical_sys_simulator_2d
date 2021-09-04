@@ -9,6 +9,9 @@
 // IMS2DViewer
 #include "msinterface/viewer.hpp"
 
+// std::tuple
+#include <tuple>
+
 class IMS2D
 {
 public:
@@ -64,6 +67,23 @@ public:
             current_step
         );
     }
+
+    typedef std::tuple<std::array<double, 2>, std::array<double, 2>> plot_factors_t;
+    void setPlotFactors(
+        plot_factors_t plot_factors
+    ) {
+        setPlotFactors(
+            std::get<0>(plot_factors),
+            std::get<1>(plot_factors)
+        );
+    };
+    void setPlotFactors(
+        std::array<double, 2> velocity_factors,
+        std::array<double, 2> force_factors
+    ) {
+        mSolver->setVelocityPlotFactor(velocity_factors);
+        mSolver->setForcePlotFactor(force_factors);
+    };
 
     double getLinearInertia(
         int N // rigid body number

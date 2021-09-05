@@ -17,7 +17,7 @@ BallOnSlopeSolverImpl(
         }}
     )
     ,
-    std::string("Example")
+    std::string("Ball on slope")
     ,
     std::array<std::string, 1>(
         {{

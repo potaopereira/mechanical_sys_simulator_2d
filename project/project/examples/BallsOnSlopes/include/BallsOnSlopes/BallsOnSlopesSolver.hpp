@@ -6,7 +6,7 @@
 // MS2DSolverImpl
 #include <mssolver/mssolverimpl.hpp>
 
-typedef MS2DSolverImpl<2, 0, 2, 2> BallsOnSlopesSolverImpl;
+typedef MS2DSolverImpl<2, 1, 2, 2> BallsOnSlopesSolverImpl;
 
 class BallsOnSlopesSolver:
 public BallsOnSlopesSymb,

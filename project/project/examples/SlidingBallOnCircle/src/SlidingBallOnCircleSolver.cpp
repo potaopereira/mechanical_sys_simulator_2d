@@ -20,7 +20,7 @@ SlidingBallOnCircleSolverImpl(
         }}
     )
     ,
-    std::string("Ball on Circle")
+    std::string("Sliding Ball on Circle")
     ,
     std::array<std::string, 1>(
         {{

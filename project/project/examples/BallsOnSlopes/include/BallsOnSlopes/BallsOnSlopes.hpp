@@ -5,7 +5,7 @@
 // IMRB2DPARAM
 #include <msinterface/param.hpp>
 
-typedef MRB2DSYMB<2, 0, 2, 2> BallsOnSlopesSymbImpl;
+typedef MRB2DSYMB<2, 1, 2, 2> BallsOnSlopesSymbImpl;
 
 class BallsOnSlopesSymb:
 public BallsOnSlopesSymbImpl,
@@ -24,10 +24,11 @@ public:
     };
 
     // do not make this private
-    float slope1;
+    float l_squared;
+    float slope_1;
     float radius1_1;
     float radius1_2;
-    float slope2;
+    float slope_2;
     float radius2_1;
     float radius2_2;
     map_t mParamList;

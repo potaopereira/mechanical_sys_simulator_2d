@@ -13,7 +13,7 @@ BallOnCircleSymbImpl(
                 {
                     .rigid_body = 0,
                     .constraint = &sop::pc_ellipse,
-                    .constraint_parameters = std::vector<Symbolic>({900/2, 900, Symbolic("outside_a0"), Symbolic("outside_a1")}),
+                    .constraint_parameters = std::vector<Symbolic>({0, 0, Symbolic("outside_a0"), Symbolic("outside_a1")}),
                     .boundary = &sop::pc_ellipse,
                     .boundary_parameters = std::vector<Symbolic>(
                             {

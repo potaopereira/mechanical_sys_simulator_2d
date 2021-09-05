@@ -1,14 +1,12 @@
-#include "BallsOnSlopes/BallsOnSlopesViewer.hpp"
+#include "SlidingBallsOnSlopes/SlidingBallsOnSlopesViewer.hpp"
 
 #include <msviewer/rbwithboundary.hpp>
 
-// sqrt
-#include <cmath>
 
-BallsOnSlopesViewer::BallsOnSlopesViewer(
+SlidingBallsOnSlopesViewer::SlidingBallsOnSlopesViewer(
 
 ):
-BallsOnSlopesSolver(),
+SlidingBallsOnSlopesSolver(),
 MSVIEW2(
     std::array<RBViewWVectors*, 2>(
         {{
@@ -61,7 +59,7 @@ IMS2D(this, this, this)
 }
 
 void
-BallsOnSlopesViewer::reset(){
+SlidingBallsOnSlopesViewer::reset(){
 
     // rigid body 0
     RBViewEllipse::param_t param0 =
@@ -96,7 +94,7 @@ BallsOnSlopesViewer::reset(){
 }
 
 void
-BallsOnSlopesViewer::showExtraAtStep(
+SlidingBallsOnSlopesViewer::showExtraAtStep(
     int step
 ){
 

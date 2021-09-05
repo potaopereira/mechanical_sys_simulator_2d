@@ -64,7 +64,6 @@ BarPendulumViewer::reset(){
     );
 }
 
-// over
 void
 BarPendulumViewer::showExtraAtStep(
     int step

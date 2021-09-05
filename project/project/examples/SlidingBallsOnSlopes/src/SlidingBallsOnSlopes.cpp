@@ -1,10 +1,10 @@
-// BallsOnSlopesSymb
-#include "BallsOnSlopes/BallsOnSlopes.hpp"
+// SlidingBallsOnSlopesSymb
+#include "SlidingBallsOnSlopes/SlidingBallsOnSlopes.hpp"
 
-BallsOnSlopesSymb::BallsOnSlopesSymb(
+SlidingBallsOnSlopesSymb::SlidingBallsOnSlopesSymb(
 
 ):
-BallsOnSlopesSymbImpl(
+SlidingBallsOnSlopesSymbImpl(
     std::array<sop::tuple_holonomic_constraint_t, 1>(
         {{
             {
@@ -24,7 +24,7 @@ BallsOnSlopesSymbImpl(
                     .constraint_parameters = std::vector<Symbolic>({0, 0, Symbolic("slope_1"), 1}),
                     .boundary = &sop::pc_ellipse,
                     .boundary_parameters = std::vector<Symbolic>({0, 0, Symbolic("radius1_1"), Symbolic("radius1_2")}),
-                    .sliding = false
+                    .sliding = true
                 }
                 ,
                 {
@@ -33,13 +33,13 @@ BallsOnSlopesSymbImpl(
                     .constraint_parameters = std::vector<Symbolic>({0, 0, 1, Symbolic("slope_2")}),
                     .boundary = &sop::pc_ellipse,
                     .boundary_parameters = std::vector<Symbolic>({0, 0, Symbolic("radius2_1"), Symbolic("radius2_2")}),
-                    .sliding = false
+                    .sliding = true
                 }
             }
         }
     )
     ,
-    std::string("BallsOnSlopes")
+    std::string("SlidingBallsOnSlopes")
 )
 ,
 IMRB2DPARAM()

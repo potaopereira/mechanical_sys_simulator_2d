@@ -33,8 +33,8 @@ mEllipse(nullptr)
     // MSVIEW1::setConstraints
     setConstraints(mListOfConstraints);
 
-    p0 <<  0, 0, 1, 0, 0, 1;
-    q0 << getParam("ball_a0"), getParam("ball_a1");
+    p0 << getParam("outside_a0")/2, 0, 1, 0, 0, 1;
+    q0 << getParam("ball_a0"), 0;
     v0 << 0, 0, 0;
 
 }

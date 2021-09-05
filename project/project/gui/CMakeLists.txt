@@ -80,3 +80,15 @@ configure_file(
     ${CMAKE_CURRENT_BINARY_DIR}/config.yaml
     @ONLY
 )
+
+# install gui binary
+install(
+    TARGETS ${PROJECT_APPLICATION_NAME}
+    RUNTIME DESTINATION bin
+)
+
+# install config file
+install(
+    FILES config/config.yaml
+    DESTINATION bin
+)

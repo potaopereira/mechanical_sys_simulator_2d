@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Name=gui
+Exec=gui
+Icon=gui
+Categories=Development;

@@ -54,7 +54,7 @@ QWidget(parent)
 ,
 mNode(node)
 ,
-mQVBoxLayout()
+mQGridLayout()
 ,
 mQGraphicsScene()
 ,
@@ -73,7 +73,7 @@ mList(std::vector<std::tuple<IMS2D*, QScrollArea*, MSOptions*>>({}))
 ,
 mSolversUpdateTimer()
 {
-    mQGraphicsScene.setSceneRect(-100, -100, 200, 200);
+    // mQGraphicsScene.setSceneRect(-100, -100, 200, 200);
     mQGraphicsView.setMinimumWidth(500);
     mQGraphicsView.setMinimumHeight(500);
     mQGraphicsView.scale(1,-1);
@@ -106,17 +106,17 @@ mSolversUpdateTimer()
     Ownership of page is passed on to the QTabWidget.
     */
     mQTabWidget.addTab(mQScrollArea, QString("Global options"));
-    mQTabWidget.setMinimumHeight(200);
+    mQTabWidget.setMinimumWidth(300);
     mQTabWidget.setTabsClosable(true);
     connect(
         &mQTabWidget, &QTabWidget::tabCloseRequested,
         this, &MultipleMSView::removeMS
     );
 
-    mQVBoxLayout.addWidget(&mQGraphicsView);
-    mQVBoxLayout.addWidget(&mTimerSlider);
-    mQVBoxLayout.addWidget(&mQTabWidget);
-    setLayout(&mQVBoxLayout);
+    mQGridLayout.addWidget(&mQGraphicsView, 0, 0, 1, 1);
+    mQGridLayout.addWidget(&mTimerSlider, 1, 0, 1, 1);
+    mQGridLayout.addWidget(&mQTabWidget, 0, 1, 1, 2);
+    setLayout(&mQGridLayout);
 
     connect(
         &mTimerSlider, &TimerSlider::sliderMoved,

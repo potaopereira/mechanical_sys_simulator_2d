@@ -103,7 +103,7 @@ public slots:
 
 private:
     YAML::Node mNode;
-    QVBoxLayout mQVBoxLayout;
+    QGridLayout mQGridLayout;
     QGraphicsScene mQGraphicsScene;
     AdaptableQGraphicsView mQGraphicsView;
     int mSteps;

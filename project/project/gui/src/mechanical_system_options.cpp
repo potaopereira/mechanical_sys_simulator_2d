@@ -8,7 +8,7 @@ RBOptions::RBOptions(
     int bodyId,
     QWidget * parent
 ):
-QWidget(parent)
+QGroupBox(ms->getName(bodyId).c_str(), parent)
 ,
 mIMS2D(ms)
 ,
@@ -93,9 +93,10 @@ mRelativePoint(std::array<double, 2>({{0,0}}))
     ++k;
     mQGridLayout.addWidget(new QLabel("point"), k, 1);
     mQGridLayout.addWidget(&mShowRelativePoint, k, 2);
-    mQGridLayout.addWidget(&mRelativeInput[0], k, 3);
-    mQGridLayout.addWidget(&mRelativeInput[1], k, 4);
-    // mQGridLayout.addWidget(mRelative[2], k, 5);
+    mQGridLayout.addWidget(&mShowRelativePointPath, k, 3);
+    mQGridLayout.addWidget(&mRelativeInput[0], k, 4);
+    mQGridLayout.addWidget(&mRelativeInput[1], k, 5);
+    // mQGridLayout.addWidget(mRelative[2], k, 6);
     for(int i = 0; i < 2; ++i)
         connect(
             &mRelativeInput[i], &QLineEdit::returnPressed,
@@ -104,6 +105,10 @@ mRelativePoint(std::array<double, 2>({{0,0}}))
     connect(
         &mShowRelativePoint, &QCheckBox::toggled,
         this, &RBOptions::showRelativePoint
+    );
+    connect(
+        &mShowRelativePointPath, &QCheckBox::toggled,
+        this, &RBOptions::showRelativePointPath
     );
     // by default, relative point is not shown
     mShowRelativePoint.setChecked(false);
@@ -138,29 +143,6 @@ mRelativePoint(std::array<double, 2>({{0,0}}))
     // by default boundary is shown
     mShowBoundary.setChecked(true);
     showBoundary(true);
-
-    IMRB2DPARAM::map_t m = mIMS2D->getFloatParameters();
-    for(IMRB2DPARAM::map_t::iterator it = m.begin(); it!=m.end(); ++it){
-        ++k;
-        IMRB2DPARAM::floatparam_t const floatparam = it->second;
-        QLabel* ql = new QLabel( QString::fromStdString(IMRB2DPARAM::getName(floatparam)) );
-        ql->setToolTip(QString::fromStdString(IMRB2DPARAM::getDescription(floatparam)));
-        mQGridLayout.addWidget(ql, k, 1);
-        QLineEdit* qle = new QLineEdit();
-        mParamLE[it->first] = qle;
-        qle->setText(QString::number(IMRB2DPARAM::getValue(floatparam), 'g', 3));
-        
-        char msg[40];
-        sprintf(msg, "Between %+.3f and %+.3f", IMRB2DPARAM::getMin(floatparam), IMRB2DPARAM::getMax(floatparam));
-        qle->setToolTip(QString(msg));
-        mQGridLayout.addWidget(qle, k, 2);
-
-        connect(
-            qle, &QLineEdit::returnPressed,
-            this, &RBOptions::ParametersChanged
-        );
-
-    }
 
     setLayout(&mQGridLayout);
 }
@@ -197,22 +179,6 @@ RBOptions::set(
 
     mRelativePointVelocity[0].setText(QString::number(q[0], 'g', 3));
     mRelativePointVelocity[1].setText(QString::number(q[1], 'g', 3));
-}
-
-void
-RBOptions::ParametersChanged(
-
-){
-
-    IMRB2DPARAM::map_t m = mIMS2D->getFloatParameters();
-    for(IMRB2DPARAM::map_t::iterator it = m.begin(); it!=m.end(); ++it){
-        std::string const floatparamname = it->first;
-        mIMS2D->setFloatParameter(
-            floatparamname,
-            mParamLE[floatparamname]->text().toFloat()
-        );
-    }
-
 }
 
 void
@@ -267,24 +233,95 @@ RBOptions::changeRelativePoint(
             mRelativeInput[1].text().toFloat()
         }}
     );
+    if(mShowRelativePoint.isChecked())
+        showRelativePoint(true);
+    if(mShowRelativePointVelocity.isChecked())
+        showRelativePointVelocity(true);
+    if(mShowRelativePointPath.isChecked())
+        showRelativePointPath(true);
 }
 
 void
 RBOptions::showRelativePoint(
-    bool //checked
+    bool checked
 ){
-    // @todo
-    // mIMS2D->showRelativePoint(mBodyId, checked, mRelativePoint);
+    mIMS2D->showRelativePoint(checked, mBodyId, mRelativePoint);
 }
 
 void
 RBOptions::showRelativePointVelocity(
-    bool //checked
+    bool checked
 ){
-    // @todo
-    // mIMS2D->showRelativePointVelocity(mBodyId, checked, mRelativePoint);
+    mIMS2D->showRelativePointVelocity(checked, mBodyId, mRelativePoint);
 }
 
+void
+RBOptions::showRelativePointPath(
+    bool checked
+){
+    mIMS2D->showRelativePointPath(
+        checked, mBodyId, mRelativePoint,
+        300 // number of points forming path
+    );
+}
+
+
+MSParameters::MSParameters(
+    IMS2D* ms,
+    QWidget * parent
+):
+QGroupBox("Parameters", parent)
+,
+mIMS2D(ms)
+,
+mQGridLayout()
+{
+    /*
+    parameters of mechanical system
+    */
+    IMRB2DPARAM::map_t m = mIMS2D->getFloatParameters();
+    int k = 0;
+    for(IMRB2DPARAM::map_t::iterator it = m.begin(); it!=m.end(); ++it){
+        IMRB2DPARAM::floatparam_t const floatparam = it->second;
+        QLabel* ql = new QLabel( QString::fromStdString(IMRB2DPARAM::getName(floatparam)) );
+        ql->setToolTip(QString::fromStdString(IMRB2DPARAM::getDescription(floatparam)));
+        mQGridLayout.addWidget(ql, k, 1);
+        QLineEdit* qle = new QLineEdit();
+        mParamLE[it->first] = qle;
+        qle->setText(QString::number(IMRB2DPARAM::getValue(floatparam), 'g', 3));
+        
+        char msg[40];
+        sprintf(msg, "Between %+.3f and %+.3f", IMRB2DPARAM::getMin(floatparam), IMRB2DPARAM::getMax(floatparam));
+        qle->setToolTip(QString(msg));
+        mQGridLayout.addWidget(qle, k, 2);
+
+        connect(
+            qle, &QLineEdit::returnPressed,
+            this, &MSParameters::ParametersChanged
+        );
+
+        /*increment index use to place widgets in layout*/
+        ++k;
+    }
+    setLayout(&mQGridLayout);
+}
+
+
+void
+MSParameters::ParametersChanged(
+
+){
+
+    IMRB2DPARAM::map_t m = mIMS2D->getFloatParameters();
+    for(IMRB2DPARAM::map_t::iterator it = m.begin(); it!=m.end(); ++it){
+        std::string const floatparamname = it->first;
+        mIMS2D->setFloatParameter(
+            floatparamname,
+            mParamLE[floatparamname]->text().toFloat()
+        );
+    }
+
+}
 
 MSOptions::MSOptions(
     IMS2D* ms,
@@ -295,8 +332,8 @@ QWidget(parent)
 mIMS2D(ms)
 ,
 mLayout()
-// ,
-// mPosition()
+,
+mMSParameters(mIMS2D)
 {
 
     for(int i = 0; i < mIMS2D->dimRigidBodies(); ++i){
@@ -306,6 +343,8 @@ mLayout()
         mLayout.addWidget(p);
 
     }
+
+    mLayout.addWidget(&mMSParameters);
     setLayout(&mLayout);
 }
 

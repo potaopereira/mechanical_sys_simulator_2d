@@ -17,31 +17,11 @@ mNode(getConfig())
 mAddMS()
 ,
 mMultipleMSView(mNode["MultipleMSView"])
-// ,
-// mQMenuBar(tr("My Menu"))
 {
-
-    QAction* newAct = new QAction(tr("&New"), this);
-    newAct->setShortcuts(QKeySequence::New);
-    newAct->setStatusTip(tr("Create a new file"));
-    connect(newAct, &QAction::triggered, this, &MainWindow::newFile);
 
     // You should then add some actions to that menu.
     //  Then you want to add the menu to the tool bar:
-    QMenu * fileMenu = menuBar()->addMenu(tr("&Rigid bodies"));
-    fileMenu->addAction(newAct);
-
-    QAction* boldAct = new QAction(tr("&New"), this);
-    // newAct->setShortcuts(QKeySequence::New);
-    // newAct->setStatusTip(tr("Create a new file"));
-    connect(boldAct, &QAction::triggered, this, &MainWindow::newFile);
-
-
-    QMenu * formatMenu = fileMenu->addMenu(tr("&Format"));
-    formatMenu->addAction(boldAct);
-
-    
-    fileMenu->addMenu(formatMenu);
+    QMenu * fileMenu = menuBar()->addMenu(tr("&Mechanical Systems"));
 
     fileMenu->addMenu(&mAddMS);
     connect(

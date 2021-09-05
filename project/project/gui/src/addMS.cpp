@@ -18,6 +18,12 @@
 // BarPendulumViewer
 #include <BarPendulum/BarPendulumViewer.hpp>
 
+// BallsOnSlopesViewer
+#include <BallsOnSlopes/BallsOnSlopesViewer.hpp>
+
+// SlidingBallsOnSlopesViewer
+#include <SlidingBallsOnSlopes/SlidingBallsOnSlopesViewer.hpp>
+
 IMS2D*
 MSFactory::create(
     MSType type
@@ -35,7 +41,12 @@ MSFactory::create(
 
         case(MSType::BarPendulumT):
             return new BarPendulumViewer();
-        
+
+        case(MSType::BallsOnSlopesT):
+            return new BallsOnSlopesViewer();
+        case(MSType::SlidingBallsOnSlopesT):
+            return new SlidingBallsOnSlopesViewer();
+
         // case(MSType::ExampleMST):
         //     return new ExampleMSViewer();
         // case(MSType::PendulumT):
@@ -72,6 +83,16 @@ AddMS::mList = {
     make_pair(
         std::string("BarPendulumT"),
         MSFactory::MSType::BarPendulumT
+    )
+    ,
+    make_pair(
+        std::string("BallsOnSlopesT"),
+        MSFactory::MSType::BallsOnSlopesT
+    )
+    ,
+    make_pair(
+        std::string("SlidingBallsOnSlopesT"),
+        MSFactory::MSType::SlidingBallsOnSlopesT
     )
     // ,
     // make_pair(

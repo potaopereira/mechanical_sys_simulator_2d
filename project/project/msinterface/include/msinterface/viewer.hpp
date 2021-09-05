@@ -131,6 +131,44 @@ public:
     ) = 0;
 
     virtual
+    void showRelativePoint(
+        bool show,
+        int N // rigid body number
+    ) = 0;
+
+    virtual
+    void setRelativePoint(
+        int N, // rigid body number
+        std::array<double, 2> point
+    ) = 0;
+
+    virtual
+    void showRelativePointVelocity(
+        bool show,
+        int N // rigid body number
+    ) = 0;
+
+    virtual
+    void setRelativePointVelocity(
+        int N, // rigid body number
+        std::array<double, 2> point,
+        std::array<double, 2> velocity
+    ) = 0;
+
+    virtual
+    void showRelativePointPath(
+        bool show,
+        int N, // rigid body number
+        int unsigned length
+    ) = 0;
+
+    virtual
+    void setRelativePointPath(
+        int N, // rigid body number
+        std::array<double, 2> point
+    ) = 0;
+
+    virtual
     void reset(
 
     ) = 0;

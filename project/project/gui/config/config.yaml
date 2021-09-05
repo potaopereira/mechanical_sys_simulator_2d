@@ -16,3 +16,8 @@ MultipleMSView:
       value: 0.02
       description: time step used in simulation
       units: seconds
+  # workspaces:
+  #   MultipleMSView:
+  #     MSOptions:
+  #       RBOptions:
+

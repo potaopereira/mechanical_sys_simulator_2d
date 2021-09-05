@@ -74,13 +74,13 @@ public:
                 d/dt r10 = +r11*omega
                 d/dt r11 = -r10*omega
                  */
-                d1ck[i][3*j + 0] = d1c[i][0];
-                d1ck[i][3*j + 1] = d1c[i][1];
+                d1ck[i][3*j + 0] = d1c[i][6*j + 0];
+                d1ck[i][3*j + 1] = d1c[i][6*j + 1];
                 d1ck[i][3*j + 2] = 
-                        +ps[6*j + 3]*d1c[i][2]
-                        -ps[6*j + 2]*d1c[i][3]
-                        +ps[6*j + 5]*d1c[i][4]
-                        -ps[6*j + 4]*d1c[i][5];
+                        +ps[6*j + 3]*d1c[i][6*j + 2]
+                        -ps[6*j + 2]*d1c[i][6*j + 3]
+                        +ps[6*j + 5]*d1c[i][6*j + 4]
+                        -ps[6*j + 4]*d1c[i][6*j + 5];
             }
         }
 

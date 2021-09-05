@@ -693,12 +693,11 @@ public:
         ddtp_t ddtp = ddtp_t::Zero();
 
         for(int i = 0; i < N; ++i){
-            int k = 6*i;
 
-            Eigen::Matrix<double, 6, 1> pi = p.segment(k, 6);
-            Eigen::Matrix<double, 3, 1> vi = v.segment(k, 3);
+            Eigen::Matrix<double, 6, 1> pi = p.segment(6*i, 6);
+            Eigen::Matrix<double, 3, 1> vi = v.segment(3*i, 3);
 
-            ddtp.segment(k, 6) = VelocityddtP(pi, vi);
+            ddtp.segment(6*i, 6) = VelocityddtP(pi, vi);
         }
         return ddtp;
     }
@@ -898,6 +897,11 @@ public:
 
         Eigen::Matrix<double, M1+M2+M3, 3*N> NS = Bker*A;
 
+        /*
+
+        /*
+        the sliding constraints does not need to be considered when
+        finding p and q
 
         // add stability terms
         // for stability terms, we must consider the non holonomic constraints
@@ -915,6 +919,21 @@ public:
         // with stability
         ddtp_t ddtp = ddtP(p, v + v_stability);
         ddtq_t ddtq = - (B.transpose()*B).llt().solve(BT*A*v) + ddtq_stability;
+        */
+
+        // add stability terms
+        // for stability terms, we must consider the non holonomic constraints
+        cextra_t _c = get_cextra(p, q);
+
+        d1cextra_t A2 = get_d1cextra(p, q);
+        d2cextra_t B2 = get_d2cextra(p, q);
+
+        Eigen::Matrix<double, M1+3*M2 + 3*N, 6*N + 2*M2> K;
+        K << A2, B2;
+        Eigen::Matrix<double, 6*N + 2*M2, 1> stability = -K.transpose()*(K*K.transpose()).llt().solve(_c);
+
+        ddtp_t ddtp = ddtP(p, v) + stability.segment(0, 6*N);
+        ddtq_t ddtq = -(B.transpose()*B).llt().solve(BT*A*v) + stability.segment(6*N, 2*M2);
 
         // ddt(A) v = (dP(A) Pdot + dQ(A) Qdto) v
         Eigen::Matrix<double, M1+3*M2+M3, 1> dA = get_ddtd1ck(p, ddtp, q, ddtq, v);
@@ -986,6 +1005,10 @@ public:
             Bker*(dA + dB*ddtq)
             // Bker*(dA - dB*inv*BT*Av)
         );
+
+        // used for debugging
+        // double det1 = (K*K.transpose()).determinant();
+        // double det2 = (NS*NS.transpose()).determinant();
 
         ddtstate_t ddtstate;
         ddtstate.segment(0       , 6*N ) = ddtp;
@@ -1387,13 +1410,23 @@ public:
         //   gsl_odeiv2_system sys = {function, jacobian, dimension, pointer to parameters};
         gsl_odeiv2_system sys = {MS2DSolverImpl<N, M1, M2, M3>::getPositionSolver, NULL, 6*N + 2*M2, this};
 
+        // gsl_odeiv2_driver * d = gsl_odeiv2_driver_alloc_y_new(
+        //     &sys,
+        //     gsl_odeiv2_step_rk8pd,
+        //     1e-6,
+        //     1e-6,
+        //     0.0
+        // );
         gsl_odeiv2_driver * d = gsl_odeiv2_driver_alloc_y_new(
             &sys,
             gsl_odeiv2_step_rk8pd,
-            1e-6,
-            1e-6,
-            0.0
+            0.0005, // initial step size
+            1e-6, // epsabs
+            0.0 // epsrel
         );
+        // set a minimum for allowed step size hmin for driver d
+        // 0.5 milliseconds
+        gsl_odeiv2_driver_set_hmin(d, 0.0005);
 
         printf("Initial:\n");
         projectSolverEvolvePrint(p0,q0);
@@ -1493,6 +1526,11 @@ public:
         p_t p = pandq.segment(0, 6*N);
         q_t q = pandq.segment(6*N, 2*M2);
 
+
+        /*
+        the sliding constraints does not need to be considered when
+        finding p and q
+
         // add stability terms
         // for stability terms, we must consider the non holonomic constraints
         c_t _c = ptr->get_c(p, q);
@@ -1507,6 +1545,24 @@ public:
         v_t v_stability = stability.segment(0, 3*N);
         ddtp_t p_dot = ptr->ddtP(p, v_stability);
         ddtq_t q_dot = stability.segment(3*N, 2*M2);
+
+        Eigen::Matrix<double, 6*N + 2*M2, 1> pandq_dot;
+        pandq_dot << p_dot, q_dot;
+        */
+
+        // add stability terms
+        // for stability terms, we must consider the non holonomic constraints
+        cextra_t _c = ptr->get_cextra(p, q);
+
+        d1cextra_t A = ptr->get_d1cextra(p, q);
+        d2cextra_t B = ptr->get_d2cextra(p, q);
+
+        Eigen::Matrix<double, M1+3*M2 + 3*N, 6*N + 2*M2> K;
+        K << A, B;
+        Eigen::Matrix<double, 6*N + 2*M2, 1> stability = -K.transpose()*(K*K.transpose()).llt().solve(_c);
+
+        ddtp_t p_dot = stability.segment(0, 6*N);
+        ddtq_t q_dot = stability.segment(6*N, 2*M2);
 
         Eigen::Matrix<double, 6*N + 2*M2, 1> pandq_dot;
         pandq_dot << p_dot, q_dot;
@@ -1585,14 +1641,14 @@ public:
         /*Explicit embedded Runge-Kutta Prince-Dormand (8, 9) method*/
         gsl_odeiv2_driver * d = gsl_odeiv2_driver_alloc_y_new(
             &sys,
-            gsl_odeiv2_step_rk8pd,
+            gsl_odeiv2_step_rk8pd, // gsl_odeiv2_step_rkf45
             0.0005, // initial step size
             1e-6, // epsabs
             0.0 // epsrel
         );
         // set a minimum for allowed step size hmin for driver d
         // 0.5 milliseconds
-        gsl_odeiv2_driver_set_hmin(d, 0.0005);
+        // gsl_odeiv2_driver_set_hmin(d, 0.0005);
 
         double t = time_initial;
         double t1 = time_initial + steps*time_step;
@@ -1625,7 +1681,11 @@ public:
 
             if (status != GSL_SUCCESS)
             {
-                printf ("error, return value=%d\n", status);
+                /*
+                If the step size drops below minimum value, the function returns with GSL_ENOPROG
+                */
+                // GSL_ENOPROG  = 27,  /* iteration is not making progress towards solution */
+                printf("error, return value=%d\n", status);
                 // @todo throw exception here
                 break;
             }

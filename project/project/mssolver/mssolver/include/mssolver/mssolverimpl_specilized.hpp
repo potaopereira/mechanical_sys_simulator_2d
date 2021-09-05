@@ -648,12 +648,11 @@ public:
         ddtp_t ddtp = ddtp_t::Zero();
 
         for(int i = 0; i < N; ++i){
-            int k = 6*i;
 
-            Eigen::Matrix<double, 6, 1> pi = p.segment(k, 6);
-            Eigen::Matrix<double, 3, 1> vi = v.segment(k, 3);
+            Eigen::Matrix<double, 6, 1> pi = p.segment(6*i, 6);
+            Eigen::Matrix<double, 3, 1> vi = v.segment(3*i, 3);
 
-            ddtp.segment(k, 6) = VelocityddtP(pi, vi);
+            ddtp.segment(6*i, 6) = VelocityddtP(pi, vi);
         }
         return ddtp;
     }

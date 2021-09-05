@@ -34,6 +34,12 @@ mRBView(
 mGroupInertialVectors(new QGraphicsItemGroup())
 ,
 mInertialVectors(std::vector<QGraphicsLineItem*>({}))
+,
+mRelativePoint(new QGraphicsEllipseItem())
+,
+mVectorAtPoint(new QGraphicsLineItem())
+,
+mPointPath(new PointPath(1))
 {
     // angular velocity: purple
     mRBView->addVector(QPen(QColor(128, 0, 128), 3, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
@@ -54,6 +60,13 @@ mInertialVectors(std::vector<QGraphicsLineItem*>({}))
         addVector();
 
     addToGroup(mGroupInertialVectors);
+
+    showRelativePoint(false);
+    addToGroup(mRelativePoint);
+    showVectorAtPoint(false);
+    addToGroup(mVectorAtPoint);
+    showPointPath(false);
+    addToGroup(mPointPath);
 
 }
 
@@ -308,4 +321,47 @@ RBViewWVectors::setVector(
 ){
     if(n < static_cast<int unsigned>(mInertialVectors.size()))
         mInertialVectors[n]->setLine(0, 0, vector(0), vector(1));
+}
+
+void RBViewWVectors::showRelativePoint(
+    bool show
+){
+    QPen pen(QColor(0, 0, 255), 4, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
+    mRelativePoint->setPen(pen);
+    mRelativePoint->setVisible(show);
+}
+
+void RBViewWVectors::setRelativePoint(
+    std::array<double, 2> point
+){
+    mRelativePoint->setRect(point[0] - 1, point[1] - 1, 2, 2);
+}
+
+void RBViewWVectors::showVectorAtPoint(
+    bool show
+){
+    QPen pen(QColor(0, 0, 255), 3, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
+    mVectorAtPoint->setPen(pen);
+    mVectorAtPoint->setVisible(show);
+}
+
+void RBViewWVectors::setVectorAtPoint(
+    std::array<double, 2> point,
+    std::array<double, 2> velocity
+){
+    mVectorAtPoint->setLine(point[0], point[1], point[0] + velocity[0], point[1] + velocity[1]);
+}
+
+void RBViewWVectors::showPointPath(
+    bool show,
+    int unsigned length
+){
+    mPointPath->setVisible(show);
+    mPointPath->setLength(length);
+}
+
+void RBViewWVectors::addToPointPath(
+    std::array<double, 2> point
+){
+    mPointPath->addToPointPath(point);
 }

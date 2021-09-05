@@ -25,7 +25,9 @@ public:
         SlidingBallOnSlopeT,
         BallOnCircleT,
         SlidingBallOnCircleT,
-        BarPendulumT
+        BarPendulumT,
+        BallsOnSlopesT,
+        SlidingBallsOnSlopesT
         // ExampleMST,
         // PendulumT,
         // BallOnParabolaNoSlidingT

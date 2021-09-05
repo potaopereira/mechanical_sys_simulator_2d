@@ -26,11 +26,14 @@
 // QLineEdit
 #include <QCheckBox>
 
+// QGroupBox
+#include <QGroupBox>
+
 // IMS2D
 #include <msinterface/interface.hpp>
 
 class RBOptions:
-public QWidget
+public QGroupBox
 {
     Q_OBJECT
 public:
@@ -53,11 +56,6 @@ public slots:
     void
     setBoundaryColor(
         QColor color
-    );
-
-    void
-    ParametersChanged(
-        // 
     );
 
     void changeLinearInertia(
@@ -92,6 +90,10 @@ public slots:
         bool checked
     );
 
+    void showRelativePointPath(
+        bool checked
+    );
+
 private:
     IMS2D* mIMS2D;
     int mBodyId;
@@ -107,14 +109,40 @@ private:
     std::array<double, 2> mRelativePoint;
     std::array<QLineEdit, 3> mRelativeInput;
     QCheckBox mShowRelativePoint;
+    QCheckBox mShowRelativePointPath;
     std::array<QLineEdit, 3> mRelativePointVelocity;
     QCheckBox mShowRelativePointVelocity;
 
     QCheckBox mShowBoundary;
     ColorButton mColorButton;
-    std::map<std::string, QLineEdit*> mParamLE;
 };
 
+
+class MSParameters:
+public QGroupBox
+{
+    Q_OBJECT
+public:
+    MSParameters(
+        IMS2D* ms,
+        QWidget* parent = 0
+    );
+
+public slots:
+    void
+    ParametersChanged(
+        // 
+    );
+
+private:
+    IMS2D* mIMS2D;
+    QGridLayout mQGridLayout;
+    /**
+     * @brief To change parameters of mechanical system
+     * 
+     */
+    std::map<std::string, QLineEdit*> mParamLE;
+};
 
 class MSOptions:
 public QWidget
@@ -135,4 +163,9 @@ private:
     IMS2D* mIMS2D;
     QVBoxLayout mLayout;
     std::vector<RBOptions*> mV;
+    /**
+     * @brief To change parameters of mechanical system
+     * 
+     */
+    MSParameters mMSParameters;
 };

@@ -132,7 +132,7 @@ public:
                 sop::get_constraint_with_contact_and_no_slide(mholonomic_constraint_with_contact[i]);
 
                 for(int k = 0; k < 6; ++k)
-                    d1c[M1 + 3*M2 + i][3*j + k] = constraint_with_contact_and_no_slide.no_slide_pdot[k];
+                    d1c[M1 + 3*M2 + i][6*j + k] = constraint_with_contact_and_no_slide.no_slide_pdot[k];
 
                 for(int k = 0; k < 3; ++k)
                     d1ck[M1 + 3*M2 + i][3*j + k] = constraint_with_contact_and_no_slide.no_slide_v[k];
@@ -151,13 +151,13 @@ public:
                 d/dt r10 = +r11*omega
                 d/dt r11 = -r10*omega
                  */
-                d1ck[i][3*j + 0] = d1c[i][0];
-                d1ck[i][3*j + 1] = d1c[i][1];
+                d1ck[i][3*j + 0] = d1c[i][6*j + 0];
+                d1ck[i][3*j + 1] = d1c[i][6*j + 1];
                 d1ck[i][3*j + 2] = 
-                        +ps[6*j + 3]*d1c[i][2]
-                        -ps[6*j + 2]*d1c[i][3]
-                        +ps[6*j + 5]*d1c[i][4]
-                        -ps[6*j + 4]*d1c[i][5];
+                        +ps[6*j + 3]*d1c[i][6*j + 2]
+                        -ps[6*j + 2]*d1c[i][6*j + 3]
+                        +ps[6*j + 5]*d1c[i][6*j + 4]
+                        -ps[6*j + 4]*d1c[i][6*j + 5];
             }
         }
 

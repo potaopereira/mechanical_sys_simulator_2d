@@ -16,6 +16,8 @@ class IMS2D
 {
 public:
 
+    typedef std::vector< std::tuple<bool, std::array<double, 2>>> show_relative_t;
+
     IMS2D(
         IMS2DSolver * solver,
         IMS2DViewer * viewer,
@@ -27,6 +29,18 @@ public:
     {
         // link viewer to solver
         mViewer->setSolver(mSolver);
+
+        for(int i = 0; i < dimRigidBodies(); ++i){
+            mShowRelativePoint.push_back(
+                std::make_tuple(false, std::array<double, 2>({{0,0}}))
+            );
+            mShowRelativePointVelocity.push_back(
+                std::make_tuple(false, std::array<double, 2>({{0,0}}))
+            );
+            mShowRelativePointPath.push_back(
+                std::make_tuple(false, std::array<double, 2>({{0,0}}))
+            );
+        }
     }
 
     IMRB2DPARAM::map_t& getFloatParameters(){
@@ -42,6 +56,25 @@ public:
         int step
     ){
         mViewer->showAtStep(step);
+        
+        for(int i = 0; i < dimRigidBodies(); ++i){
+            if(std::get<0>(mShowRelativePoint[i]))
+                mViewer->setRelativePoint(
+                    i,
+                    getPositionOfPoint(step, i, std::get<1>(mShowRelativePoint[i]))
+                );
+            if(std::get<0>(mShowRelativePointVelocity[i]))
+                mViewer->setRelativePointVelocity(
+                    i,
+                    getPositionOfPoint(step, i, std::get<1>(mShowRelativePointVelocity[i])),
+                    getVelocityOfPoint(step, i, std::get<1>(mShowRelativePointVelocity[i]))
+                );
+            if(std::get<0>(mShowRelativePointPath[i]))
+                mViewer->setRelativePointPath(
+                    i, 
+                    getPositionOfPoint(step, i, std::get<1>(mShowRelativePointPath[i]))
+                );
+        }
     }
 
     std::string getName() const {
@@ -155,6 +188,43 @@ public:
         return mSolver->getVelocityOfPoint(step, N, relative_position);
     };
 
+    void showRelativePoint(
+        bool show,
+        int N, // rigid body number
+        std::array<double, 2> relative_position
+    ) {
+        mViewer->showRelativePoint(show, N);
+        mShowRelativePoint[N] = std::make_tuple(
+            show,
+            relative_position
+        );
+    };
+
+    void showRelativePointVelocity(
+        bool show,
+        int N, // rigid body number
+        std::array<double, 2> relative_position
+    ) {
+        mViewer->showRelativePointVelocity(show, N);
+        mShowRelativePointVelocity[N] = std::make_tuple(
+            show,
+            relative_position
+        );
+    };
+
+    void showRelativePointPath(
+        bool show,
+        int N, // rigid body number
+        std::array<double, 2> relative_position,
+        int unsigned length
+    ) {
+        mViewer->showRelativePointPath(show, N, length);
+        mShowRelativePointPath[N] = std::make_tuple(
+            show,
+            relative_position
+        );
+    };
+
     virtual
     QGraphicsItemGroup* getView(){
         return mViewer->getView();
@@ -199,4 +269,9 @@ private:
     IMS2DSolver * mSolver;
     IMS2DViewer * mViewer;
     IMRB2DPARAM * mParam;
+
+    show_relative_t mShowRelativePoint;
+    show_relative_t mShowRelativePointVelocity;
+    show_relative_t mShowRelativePointPath;
+
 };

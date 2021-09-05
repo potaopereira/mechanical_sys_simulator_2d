@@ -308,6 +308,50 @@ Symbolic inner(
 }
 
 Symbolic
+pc_distbetweenpoints(
+    lp_t const & lp1
+    ,
+    lp_t const & lp2
+    ,
+    std::vector<Symbolic> const & parameters // = std::vector<Symbolic>({Symbolic("dsquared")})
+){
+    if(parameters.size() != 1)
+        throw std::invalid_argument("distance position requires 1 parameters: a distance squared.");
+
+    lp_t dd;
+    dd[0] = lp1[0] - lp2[0];
+    dd[1] = lp1[1] - lp2[1];
+    return inner(dd, dd) - parameters[0];
+}
+
+Symbolic
+hc_distbetweenpoints(
+    std::vector<int> const & rigid_bodies
+    ,
+    std::vector<Symbolic> const & parameters // = std::vector<Symbolic>({Symbolic("r0"), Symbolic("r1"), Symbolic("s0"), Symbolic("s1"), Symbolic("dsquared")})
+){
+    if(rigid_bodies.size()!=2)
+        throw std::invalid_argument("Distance between points applies to two rigid bodies.");
+
+    if(parameters.size()!=5)
+        throw std::invalid_argument("Distance between points requires 5 parameters: two relative points, and a distance squared.");
+
+    p_t p0 = getP(rigid_bodies[0]);
+    lp_t point_body0;
+    point_body0[0] = parameters[0];
+    point_body0[1] = parameters[1];
+    lp_t point_inertial0 = getPoint(p0, point_body0);
+
+    p_t p1 = getP(rigid_bodies[1]);
+    lp_t point_body1;
+    point_body1[0] = parameters[2];
+    point_body1[1] = parameters[3];
+    lp_t point_inertial1 = getPoint(p1, point_body1);
+
+    return pc_distbetweenpoints(point_inertial0, point_inertial1, std::vector<Symbolic>({parameters[4]}));
+}
+
+Symbolic
 pc_dist2point(
     lp_t const & lp1
     ,
@@ -334,7 +378,7 @@ hc_dist2point(
         throw std::invalid_argument("Distance to point applies to a single rigid body.");
 
     if(parameters.size()!=5)
-        throw std::invalid_argument("Distance to point  requires 5 parameters: point, relative point, and distance squared.");
+        throw std::invalid_argument("Distance to point requires 5 parameters: point, relative point, and distance squared.");
 
     p_t p = getP(rigid_bodies[0]);
     lp_t point_body;

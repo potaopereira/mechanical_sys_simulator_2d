@@ -58,6 +58,8 @@ target_link_libraries(${PROJECT_APPLICATION_NAME}
     BallOnCircle
     SlidingBallOnCircle
     BarPendulum
+    BallsOnSlopes
+    SlidingBallsOnSlopes
     # ExampleMS
 )
 

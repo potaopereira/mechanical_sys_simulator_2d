@@ -59,6 +59,22 @@ hc_*** = holonomic contraint
 */
 
 Symbolic
+pc_distbetweenpoints(
+    lp_t const & lp1
+    ,
+    lp_t const & lp2
+    ,
+    std::vector<Symbolic> const & parameters = std::vector<Symbolic>({Symbolic("dsquared")})
+);
+
+Symbolic
+hc_distbetweenpoints(
+    std::vector<int> const & rigid_bodies
+    ,
+    std::vector<Symbolic> const & parameters = std::vector<Symbolic>({Symbolic("r0"), Symbolic("r1"), Symbolic("s0"), Symbolic("s1"), Symbolic("dsquared")})
+);
+
+Symbolic
 pc_dist2point(
     lp_t const & lp1
     ,

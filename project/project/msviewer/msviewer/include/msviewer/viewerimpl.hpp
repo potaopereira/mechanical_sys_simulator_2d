@@ -190,6 +190,61 @@ public:
     }
 
     virtual
+    void showRelativePoint(
+        bool show,
+        int body_id // rigid body number
+    ){
+        if(body_id < N)
+            mListOfBodies[body_id]->showRelativePoint(show);
+    }
+
+    virtual
+    void setRelativePoint(
+        int body_id, // rigid body number
+        std::array<double, 2> point
+    ){
+        mListOfBodies[body_id]->setRelativePoint(point);
+    }
+
+    virtual
+    void showRelativePointVelocity(
+        bool show,
+        int body_id
+    ){
+        if(body_id < N)
+            mListOfBodies[body_id]->showVectorAtPoint(show);
+    }
+
+    virtual
+    void setRelativePointVelocity(
+        int body_id, // rigid body number
+        std::array<double, 2> point,
+        std::array<double, 2> velocity
+    ){
+        if(body_id < N)
+            mListOfBodies[body_id]->setVectorAtPoint(point, velocity);
+    }
+
+    virtual
+    void showRelativePointPath(
+        bool show,
+        int body_id, // rigid body number
+        int unsigned length
+    ){
+        if(body_id < N)
+            mListOfBodies[body_id]->showPointPath(show, length);
+    }
+
+    virtual
+    void setRelativePointPath(
+        int body_id, // rigid body number
+        std::array<double, 2> point
+    ){
+        if(body_id < N)
+            mListOfBodies[body_id]->addToPointPath(point);
+    }
+
+    virtual
     QGraphicsItemGroup* getView() {
         return this;
     };

@@ -49,7 +49,6 @@ private:
     YAML::Node mNode;
     AddMS mAddMS;
     MultipleMSView mMultipleMSView;
-    QMenuBar mQMenuBar;
 
     static
     YAML::Node getConfig();

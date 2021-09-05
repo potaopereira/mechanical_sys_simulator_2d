@@ -25,6 +25,8 @@ public:
 
     // do not make this private
     float slope;
+    float offset1;
+    float offset2;
     float radius1;
     float radius2;
     map_t mParamList;

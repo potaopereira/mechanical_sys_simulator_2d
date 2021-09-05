@@ -13,7 +13,7 @@ MSVIEW1(
             {
                 // rigid body 0
                 new RBViewEllipse(
-                        Eigen::Matrix<double, 2, 1>(0, 0),
+                        Eigen::Matrix<double, 2, 1>(getParam("offset1"), getParam("offset2")),
                         Eigen::Matrix<double, 2, 1>(getParam("radius1"), getParam("radius2")),
                         0
                     )
@@ -44,7 +44,7 @@ BallOnSlopeViewer::reset(){
     // rigid body 0
     RBViewEllipse::param_t param1 =
         std::make_tuple(
-            Eigen::Matrix<double, 2, 1>(0, 0),
+            Eigen::Matrix<double, 2, 1>(getParam("offset1"), getParam("offset2")),
             Eigen::Matrix<double, 2, 1>(getParam("radius1"), getParam("radius2")),
             0
         );

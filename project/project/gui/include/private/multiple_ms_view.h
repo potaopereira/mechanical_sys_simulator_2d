@@ -80,6 +80,10 @@ public:
     addMS(
         IMS2D*
     );
+    void
+    removeMS(
+        int index
+    );
 
     YAML::Node getNode();
 

@@ -43,6 +43,9 @@ public:
         }
     }
 
+    // allow for proper subclassing destruction
+    virtual ~IMS2D() {}
+
     IMRB2DPARAM::map_t& getFloatParameters(){
         return mParam->getFloatParameters();
     };

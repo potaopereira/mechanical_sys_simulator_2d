@@ -107,6 +107,11 @@ mSolversUpdateTimer()
     */
     mQTabWidget.addTab(mQScrollArea, QString("Global options"));
     mQTabWidget.setMinimumHeight(200);
+    mQTabWidget.setTabsClosable(true);
+    connect(
+        &mQTabWidget, &QTabWidget::tabCloseRequested,
+        this, &MultipleMSView::removeMS
+    );
 
     mQVBoxLayout.addWidget(&mQGraphicsView);
     mQVBoxLayout.addWidget(&mTimerSlider);
@@ -178,6 +183,29 @@ MultipleMSView::addMS(
 
     mQGraphicsScene.addItem(ptr->getView());
 
+}
+
+
+void MultipleMSView::removeMS(
+    int index
+){
+    if(index==0)
+        return;
+
+    // delete scroll and options from above
+    QWidget * q = mQTabWidget.widget(index);
+    mQTabWidget.removeTab(index);
+    delete q;
+    
+
+    // decremet to get mechanical system index
+    index -= 1;
+    IMS2D* ptr = std::get<0>(mList[index]);
+    mQGraphicsScene.removeItem(ptr->getView());
+    delete ptr;
+
+    // remove element from the list
+    mList.erase(mList.begin() + index);
 }
 
 void

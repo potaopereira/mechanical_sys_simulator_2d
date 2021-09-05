@@ -19,17 +19,17 @@ mQGridLayout()
 mRelativePoint(std::array<double, 2>({{0,0}}))
 {
 
-    mQGridLayout.addWidget(new QLabel( ms->getName(mBodyId).c_str()), 0, 0);
+    // mQGridLayout.addWidget(new QLabel( ms->getName(mBodyId).c_str()), 0, 0);
 
     int k = 1;
-    mQGridLayout.addWidget(new QLabel("inertias"), k, 1);
+    mQGridLayout.addWidget(new QLabel("inertias"), k, 0);
     mInertia[0].setToolTip("mass kg");
     mInertia[0].setText(QString::number(ms->getLinearInertia(mBodyId), 'g', 3));
-    mQGridLayout.addWidget(&mInertia[0], k, 2);
+    mQGridLayout.addWidget(&mInertia[0], k, 1);
     mInertia[1].setToolTip("moment of inertia kg / mm / mm");
     mInertia[1].setText(QString::number(ms->getAngularInertia(mBodyId), 'g', 3));
-    mQGridLayout.addWidget(&mInertia[1], k, 3);
-    // mQGridLayout.addWidget(&mInertia[2], k, 4);
+    mQGridLayout.addWidget(&mInertia[1], k, 2);
+    // mQGridLayout.addWidget(&mInertia[2], k, 3);
     connect(
         &mInertia[0], &QLineEdit::returnPressed,
         this, &RBOptions::changeLinearInertia
@@ -40,14 +40,14 @@ mRelativePoint(std::array<double, 2>({{0,0}}))
     );
 
     ++k;
-    mQGridLayout.addWidget(new QLabel("position"), k, 1);
-    mQGridLayout.addWidget(&mShowPosition, k, 2);
+    mQGridLayout.addWidget(new QLabel("position"), k, 0);
+    mQGridLayout.addWidget(&mShowPosition, k, 1);
     mPosition[0].setToolTip("linear position x in mm");
-    mQGridLayout.addWidget(&mPosition[0], k, 3);
+    mQGridLayout.addWidget(&mPosition[0], k, 2);
     mPosition[1].setToolTip("linear position y in mm");
-    mQGridLayout.addWidget(&mPosition[1], k, 4);
+    mQGridLayout.addWidget(&mPosition[1], k, 3);
     mPosition[2].setToolTip("angular position in degrees");
-    mQGridLayout.addWidget(&mPosition[2], k, 5);
+    mQGridLayout.addWidget(&mPosition[2], k, 4);
     connect(
         &mShowPosition, &QCheckBox::toggled,
         this, &RBOptions::showPosition
@@ -57,14 +57,14 @@ mRelativePoint(std::array<double, 2>({{0,0}}))
     showPosition(true);
 
     ++k;
-    mQGridLayout.addWidget(new QLabel("velocity"), k, 1);
-    mQGridLayout.addWidget(&mShowVelocity, k, 2);
+    mQGridLayout.addWidget(new QLabel("velocity"), k, 0);
+    mQGridLayout.addWidget(&mShowVelocity, k, 1);
     mVelocity[0].setToolTip("linear velocity x in mm/s");
-    mQGridLayout.addWidget(&mVelocity[0], k, 3);
+    mQGridLayout.addWidget(&mVelocity[0], k, 2);
     mVelocity[1].setToolTip("linear velocity y in mm/s");
-    mQGridLayout.addWidget(&mVelocity[1], k, 4);
+    mQGridLayout.addWidget(&mVelocity[1], k, 3);
     mVelocity[2].setToolTip("angular velocity in degrees/s");
-    mQGridLayout.addWidget(&mVelocity[2], k, 5);
+    mQGridLayout.addWidget(&mVelocity[2], k, 4);
     connect(
         &mShowVelocity, &QCheckBox::toggled,
         this, &RBOptions::showVelocity
@@ -74,14 +74,14 @@ mRelativePoint(std::array<double, 2>({{0,0}}))
     showVelocity(false);
 
     ++k;
-    mQGridLayout.addWidget(new QLabel("force"), k, 1);
-    mQGridLayout.addWidget(&mShowForce, k, 2);
+    mQGridLayout.addWidget(new QLabel("force"), k, 0);
+    mQGridLayout.addWidget(&mShowForce, k, 1);
     mForce[0].setToolTip("linear force x in kg mm / s / s");
-    mQGridLayout.addWidget(&mForce[0], k, 3);
+    mQGridLayout.addWidget(&mForce[0], k, 2);
     mForce[1].setToolTip("linear force y in kg mm / s / s");
-    mQGridLayout.addWidget(&mForce[1], k, 4);
+    mQGridLayout.addWidget(&mForce[1], k, 3);
     mForce[2].setToolTip("angular force in (kg / mm / mm / s / s) times 180/pi");
-    mQGridLayout.addWidget(&mForce[2], k, 5);
+    mQGridLayout.addWidget(&mForce[2], k, 4);
     connect(
         &mShowForce, &QCheckBox::toggled,
         this, &RBOptions::showForce
@@ -91,12 +91,14 @@ mRelativePoint(std::array<double, 2>({{0,0}}))
     showForce(false);
 
     ++k;
-    mQGridLayout.addWidget(new QLabel("point"), k, 1);
-    mQGridLayout.addWidget(&mShowRelativePoint, k, 2);
-    mQGridLayout.addWidget(&mShowRelativePointPath, k, 3);
-    mQGridLayout.addWidget(&mRelativeInput[0], k, 4);
-    mQGridLayout.addWidget(&mRelativeInput[1], k, 5);
-    // mQGridLayout.addWidget(mRelative[2], k, 6);
+    mQGridLayout.addWidget(new QLabel("point"), k, 0);
+    mShowRelativePoint.setToolTip("Show point on rigid body");
+    mQGridLayout.addWidget(&mShowRelativePoint, k, 1);
+    mShowRelativePointPath.setToolTip("Show path of point on rigid body");
+    mQGridLayout.addWidget(&mShowRelativePointPath, k, 2);
+    mQGridLayout.addWidget(&mRelativeInput[0], k, 3);
+    mQGridLayout.addWidget(&mRelativeInput[1], k, 4);
+    // mQGridLayout.addWidget(mRelative[2], k, 5);
     for(int i = 0; i < 2; ++i)
         connect(
             &mRelativeInput[i], &QLineEdit::returnPressed,
@@ -115,8 +117,9 @@ mRelativePoint(std::array<double, 2>({{0,0}}))
     showRelativePoint(false);
 
     ++k;
-    mQGridLayout.addWidget(new QLabel("point velocity"), k, 1);
-    mQGridLayout.addWidget(&mShowRelativePointVelocity, k, 2);
+    mQGridLayout.addWidget(new QLabel("point velocity"), k, 0);
+    mShowRelativePointVelocity.setToolTip("Show velocity of point on rigid body");
+    mQGridLayout.addWidget(&mShowRelativePointVelocity, k, 1);
     mQGridLayout.addWidget(&mRelativePointVelocity[0], k, 3);
     mQGridLayout.addWidget(&mRelativePointVelocity[1], k, 4);
     // mQGridLayout.addWidget(mRelative[2], k, 5);
@@ -129,9 +132,9 @@ mRelativePoint(std::array<double, 2>({{0,0}}))
     showRelativePointVelocity(false);
 
     ++k;
-    mQGridLayout.addWidget(new QLabel("show boundary"), k, 1);
-    mQGridLayout.addWidget(&mShowBoundary, k, 2);
-    mQGridLayout.addWidget(&mColorButton, k, 3);
+    mQGridLayout.addWidget(new QLabel("show boundary"), k, 0);
+    mQGridLayout.addWidget(&mShowBoundary, k, 1);
+    mQGridLayout.addWidget(&mColorButton, k, 2);
     connect(
         &mColorButton, &ColorButton::colorChanged,
         this, &RBOptions::setBoundaryColor

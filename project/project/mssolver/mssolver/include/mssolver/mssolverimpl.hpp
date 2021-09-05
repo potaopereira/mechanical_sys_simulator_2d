@@ -898,8 +898,6 @@ public:
         Eigen::Matrix<double, M1+M2+M3, 3*N> NS = Bker*A;
 
         /*
-
-        /*
         the sliding constraints does not need to be considered when
         finding p and q
 

@@ -143,7 +143,8 @@ SolversUpdateTimer::solverupdate() {
     int progress = mFinalProgess;
     int N = mThreadsList.size();
     for(int i = 0; i < N; ++i){
-        progress = std::min(progress, mThreadsList[i]->getProgrees());
+        if(!mThreadsList[i]->isFinished())
+            progress = std::min(progress, mThreadsList[i]->getProgrees());
     }
     emit setProgress(progress);
 

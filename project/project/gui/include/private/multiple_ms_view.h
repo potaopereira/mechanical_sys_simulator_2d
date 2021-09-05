@@ -101,6 +101,10 @@ public slots:
         IMS2D::plot_factors_t
     );
 
+    void setGravity(
+        std::array<double, 2> const & gravity
+    );
+
 private:
     YAML::Node mNode;
     QGridLayout mQGridLayout;

@@ -25,11 +25,10 @@ mRelativePoint(std::array<double, 2>({{0,0}}))
     mQGridLayout.addWidget(new QLabel("inertias"), k, 0);
     mInertia[0].setToolTip("mass kg");
     mInertia[0].setText(QString::number(ms->getLinearInertia(mBodyId), 'g', 3));
-    mQGridLayout.addWidget(&mInertia[0], k, 1);
+    mQGridLayout.addWidget(&mInertia[0], k, 3);
     mInertia[1].setToolTip("moment of inertia kg / mm / mm");
     mInertia[1].setText(QString::number(ms->getAngularInertia(mBodyId), 'g', 3));
-    mQGridLayout.addWidget(&mInertia[1], k, 2);
-    // mQGridLayout.addWidget(&mInertia[2], k, 3);
+    mQGridLayout.addWidget(&mInertia[1], k, 6);
     connect(
         &mInertia[0], &QLineEdit::returnPressed,
         this, &RBOptions::changeLinearInertia
@@ -41,13 +40,14 @@ mRelativePoint(std::array<double, 2>({{0,0}}))
 
     ++k;
     mQGridLayout.addWidget(new QLabel("position"), k, 0);
+    mShowPosition.setText(QString("Show"));
     mQGridLayout.addWidget(&mShowPosition, k, 1);
     mPosition[0].setToolTip("linear position x in mm");
-    mQGridLayout.addWidget(&mPosition[0], k, 2);
+    mQGridLayout.addWidget(&mPosition[0], k, 3);
     mPosition[1].setToolTip("linear position y in mm");
-    mQGridLayout.addWidget(&mPosition[1], k, 3);
+    mQGridLayout.addWidget(&mPosition[1], k, 4);
     mPosition[2].setToolTip("angular position in degrees");
-    mQGridLayout.addWidget(&mPosition[2], k, 4);
+    mQGridLayout.addWidget(&mPosition[2], k, 6);
     connect(
         &mShowPosition, &QCheckBox::toggled,
         this, &RBOptions::showPosition
@@ -58,13 +58,30 @@ mRelativePoint(std::array<double, 2>({{0,0}}))
 
     ++k;
     mQGridLayout.addWidget(new QLabel("velocity"), k, 0);
+    mShowVelocity.setText(QString("All"));
     mQGridLayout.addWidget(&mShowVelocity, k, 1);
+    mShowLinearVelocity.setText(QString("Linear"));
+    mShowLinearVelocity.setChecked(false);
+    mQGridLayout.addWidget(&mShowLinearVelocity, k, 2);
     mVelocity[0].setToolTip("linear velocity x in mm/s");
-    mQGridLayout.addWidget(&mVelocity[0], k, 2);
+    mQGridLayout.addWidget(&mVelocity[0], k, 3);
     mVelocity[1].setToolTip("linear velocity y in mm/s");
-    mQGridLayout.addWidget(&mVelocity[1], k, 3);
+    mQGridLayout.addWidget(&mVelocity[1], k, 4);
+    mShowAngularVelocity.setText(QString("Angular"));
+    mShowAngularVelocity.setChecked(false);
+    mQGridLayout.addWidget(&mShowAngularVelocity, k, 5);
     mVelocity[2].setToolTip("angular velocity in degrees/s");
-    mQGridLayout.addWidget(&mVelocity[2], k, 4);
+    mQGridLayout.addWidget(&mVelocity[2], k, 6);
+
+    connect(
+        &mShowLinearVelocity, &QCheckBox::toggled,
+        this, &RBOptions::showLinearVelocity
+    );
+    mShowAngularVelocity.setChecked(false);
+    connect(
+        &mShowAngularVelocity, &QCheckBox::toggled,
+        this, &RBOptions::showAngularVelocity
+    );
     connect(
         &mShowVelocity, &QCheckBox::toggled,
         this, &RBOptions::showVelocity
@@ -73,15 +90,32 @@ mRelativePoint(std::array<double, 2>({{0,0}}))
     mShowVelocity.setChecked(false);
     showVelocity(false);
 
+
     ++k;
     mQGridLayout.addWidget(new QLabel("force"), k, 0);
+    mShowForce.setText(QString("All"));
     mQGridLayout.addWidget(&mShowForce, k, 1);
+    mShowLinearForce.setText(QString("Linear"));
+    mShowLinearForce.setChecked(false);
+    mQGridLayout.addWidget(&mShowLinearForce, k, 2);
     mForce[0].setToolTip("linear force x in kg mm / s / s");
-    mQGridLayout.addWidget(&mForce[0], k, 2);
+    mQGridLayout.addWidget(&mForce[0], k, 3);
     mForce[1].setToolTip("linear force y in kg mm / s / s");
-    mQGridLayout.addWidget(&mForce[1], k, 3);
+    mQGridLayout.addWidget(&mForce[1], k, 4);
+    mShowAngularForce.setText(QString("Angular"));
+    mShowAngularForce.setChecked(false);
+    mQGridLayout.addWidget(&mShowAngularForce, k, 5);
     mForce[2].setToolTip("angular force in (kg / mm / mm / s / s) times 180/pi");
-    mQGridLayout.addWidget(&mForce[2], k, 4);
+    mQGridLayout.addWidget(&mForce[2], k, 6);
+
+    connect(
+        &mShowLinearForce, &QCheckBox::toggled,
+        this, &RBOptions::showLinearForce
+    );
+    connect(
+        &mShowAngularForce, &QCheckBox::toggled,
+        this, &RBOptions::showAngularForce
+    );
     connect(
         &mShowForce, &QCheckBox::toggled,
         this, &RBOptions::showForce
@@ -91,10 +125,12 @@ mRelativePoint(std::array<double, 2>({{0,0}}))
     showForce(false);
 
     ++k;
-    mQGridLayout.addWidget(new QLabel("point"), k, 0);
+    mQGridLayout.addWidget(new QLabel("Point"), k, 0);
+    mShowRelativePoint.setText(QString("Show"));
     mShowRelativePoint.setToolTip("Show point on rigid body");
-    mQGridLayout.addWidget(&mShowRelativePoint, k, 1);
+    mShowRelativePointPath.setText(QString("Path"));
     mShowRelativePointPath.setToolTip("Show path of point on rigid body");
+    mQGridLayout.addWidget(&mShowRelativePoint, k, 1);
     mQGridLayout.addWidget(&mShowRelativePointPath, k, 2);
     mQGridLayout.addWidget(&mRelativeInput[0], k, 3);
     mQGridLayout.addWidget(&mRelativeInput[1], k, 4);
@@ -117,7 +153,8 @@ mRelativePoint(std::array<double, 2>({{0,0}}))
     showRelativePoint(false);
 
     ++k;
-    mQGridLayout.addWidget(new QLabel("point velocity"), k, 0);
+    mQGridLayout.addWidget(new QLabel("Point velocity"), k, 0);
+    mShowRelativePointVelocity.setText(QString("Show"));
     mShowRelativePointVelocity.setToolTip("Show velocity of point on rigid body");
     mQGridLayout.addWidget(&mShowRelativePointVelocity, k, 1);
     mQGridLayout.addWidget(&mRelativePointVelocity[0], k, 3);
@@ -132,7 +169,8 @@ mRelativePoint(std::array<double, 2>({{0,0}}))
     showRelativePointVelocity(false);
 
     ++k;
-    mQGridLayout.addWidget(new QLabel("show boundary"), k, 0);
+    mQGridLayout.addWidget(new QLabel("Boundary"), k, 0);
+    mShowBoundary.setText(QString("Show"));
     mQGridLayout.addWidget(&mShowBoundary, k, 1);
     mQGridLayout.addWidget(&mColorButton, k, 2);
     connect(
@@ -219,6 +257,20 @@ RBOptions::showVelocity(
 }
 
 void
+RBOptions::showLinearVelocity(
+    bool checked
+){
+    mIMS2D->showLinearVelocity(mBodyId, checked);
+}
+
+void
+RBOptions::showAngularVelocity(
+    bool checked
+){
+    mIMS2D->showAngularVelocity(mBodyId, checked);
+}
+
+void
 RBOptions::showForce(
     bool checked
 ){
@@ -226,6 +278,19 @@ RBOptions::showForce(
     // mIMS2D->showForce(mBodyId, mShowForce.isChecked());
 }
 
+void
+RBOptions::showLinearForce(
+    bool checked
+){
+    mIMS2D->showLinearForce(mBodyId, checked);
+}
+
+void
+RBOptions::showAngularForce(
+    bool checked
+){
+    mIMS2D->showAngularForce(mBodyId, checked);
+}
 
 void
 RBOptions::changeRelativePoint(

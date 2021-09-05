@@ -104,6 +104,18 @@ public:
         );
     }
 
+    std::array<double, 2> getGravity(
+        //
+    ){
+        return mSolver->getGravity();
+    }
+
+    void setGravity(
+        std::array<double, 2> gravity
+    ){
+        mSolver->setGravity(gravity);
+    }
+
     typedef std::tuple<std::array<double, 2>, std::array<double, 2>> plot_factors_t;
     void setPlotFactors(
         plot_factors_t plot_factors
@@ -247,11 +259,39 @@ public:
         mViewer->showVelocity(i, show);
     }
 
+    void showLinearVelocity(
+        int i, // rigid body id
+        bool show
+    ){
+        mViewer->showLinearVelocity(i, show);
+    }
+
+    void showAngularVelocity(
+        int i, // rigid body id
+        bool show
+    ){
+        mViewer->showAngularVelocity(i, show);
+    }
+
     void showForce(
         int i, // rigid body id
         bool show
     ){
         mViewer->showForce(i, show);
+    }
+
+    void showLinearForce(
+        int i, // rigid body id
+        bool show
+    ){
+        mViewer->showLinearForce(i, show);
+    }
+
+    void showAngularForce(
+        int i, // rigid body id
+        bool show
+    ){
+        mViewer->showAngularForce(i, show);
     }
 
     void showBoundary(

@@ -74,7 +74,23 @@ public slots:
         bool checked
     );
 
+    void showLinearVelocity(
+        bool checked
+    );
+
+    void showAngularVelocity(
+        bool checked
+    );
+
     void showForce(
+        bool checked
+    );
+
+    void showLinearForce(
+        bool checked
+    );
+
+    void showAngularForce(
         bool checked
     );
 
@@ -102,8 +118,12 @@ private:
     QCheckBox mShowPosition;
     std::array<QLineEdit, 3> mPosition;
     QCheckBox mShowVelocity;
+    QCheckBox mShowLinearVelocity;
+    QCheckBox mShowAngularVelocity;
     std::array<QLineEdit, 3> mVelocity;
     QCheckBox mShowForce;
+    QCheckBox mShowLinearForce;
+    QCheckBox mShowAngularForce;
     std::array<QLineEdit, 3> mForce;
 
     std::array<double, 2> mRelativePoint;

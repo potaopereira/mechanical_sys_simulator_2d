@@ -93,6 +93,16 @@ public:
         int N // rigid body number
     ) = 0;
 
+    virtual
+    std::array<double, 2> getGravity(
+        //
+    ) const = 0 ;
+
+    virtual
+    void setGravity(
+        std::array<double, 2> gravity
+    ) = 0 ;
+
     /**************************************************************************/
     /* for plotting I decided to use eigen                                    */
     /**************************************************************************/

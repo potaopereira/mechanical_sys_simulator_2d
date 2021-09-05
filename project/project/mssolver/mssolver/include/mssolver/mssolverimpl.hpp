@@ -71,6 +71,8 @@ public:
     mVelocityPlotFactor(std::array<double,2>({{1,1}}))
     ,
     mForcePlotFactor(std::array<double,2>({{1,1}}))
+    ,
+    mGravity(std::array<double,2>({{0, -9.8*1000}})) // force in kg mm / s / s (using millimeters instead of meters)
     {
         mListWithContact = ptr->getListOrderedWithContact();
 
@@ -179,6 +181,29 @@ public:
         mI(3*i + 2, 3*i + 2) = moment_of_inertia;
         mIinv(3*i + 2, 3*i + 2) = 1./moment_of_inertia;
     }
+
+    /**
+     * @brief Get the gravity force acting on each rigid body
+     * 
+     * @return std::array<double, 2> Gravity force
+     */
+    virtual
+    std::array<double, 2> getGravity(
+    ) const {
+        return mGravity;
+    };
+
+    /**
+     * @brief Set the gravity force acting on each rigid body
+     * 
+     * @param gravity Gravity force
+     */
+    virtual
+    void setGravity(
+        std::array<double, 2> gravity
+    ){
+        mGravity = gravity;
+    };
 
     /**
      * @brief Compute time derivative of pose of a rigid body, given its twist
@@ -802,7 +827,7 @@ public:
         double time
     ){
         IMS2DSolver::rbf_t f = IMS2DSolver::rbf_t::Zero();
-        f << 0, -10, 0; // kg / s / s
+        f << mGravity[0], mGravity[1], 0; // kg mm / s / s
         return f;
     }
 
@@ -1750,6 +1775,12 @@ private:
      * 
      */
     std::array<double, 2> mForcePlotFactor;
+
+    /**
+     * @brief Linear and angular factors for plotting linear and angular force
+     * 
+     */
+    std::array<double, 2> mGravity;
 
     /**
      * @brief Validate rigid body id and throw exception if it is not valid

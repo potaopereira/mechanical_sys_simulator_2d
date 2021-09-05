@@ -118,6 +118,22 @@ mDeltaTime(
     std::string("Time steps in seconds, when computing solution")
 )
 ,
+mGravity1(
+    std::string("Gravity x"),
+    -10000, // min
+    +10000, // max
+    0, // initial
+    std::string("Gravity x component in kg mm / s / s")
+)
+,
+mGravity2(
+    std::string("Gravity y"),
+    -10000, // min
+    +10000, // max
+    -9.8*1000, // initial
+    std::string("Gravity y component in kg mm / s / s")
+)
+,
 mSetLinearVelocityPlotFactor(
     std::string("x Linear vel"),
     0, // min
@@ -154,6 +170,8 @@ mSetAngularForcePlotFactor(
     mLayout.addWidget(&mInitialTime);
     mLayout.addWidget(&mFinalTime);
     mLayout.addWidget(&mDeltaTime);
+    mLayout.addWidget(&mGravity1);
+    mLayout.addWidget(&mGravity2);
     mLayout.addWidget(&mSetLinearVelocityPlotFactor);
     mLayout.addWidget(&mSetAngularVelocityPlotFactor);
     mLayout.addWidget(&mSetLinearForcePlotFactor);
@@ -165,6 +183,14 @@ mSetAngularForcePlotFactor(
         this, &GlobalOptions::requestSolver
     );
 
+    connect(
+        &mGravity1, &GlobalOptionFloat::valueChanged,
+        this, &GlobalOptions::updateGravity
+    );
+    connect(
+        &mGravity2, &GlobalOptionFloat::valueChanged,
+        this, &GlobalOptions::updateGravity
+    );
     connect(
         &mSetLinearVelocityPlotFactor, &GlobalOptionFloat::valueChanged,
         this, &GlobalOptions::updatePlotFactors
@@ -216,6 +242,20 @@ GlobalOptions::requestSolver(
             );
         // }
     }
+}
+
+void
+GlobalOptions::updateGravity(
+
+){
+    emit changeGravity(
+        std::array<double, 2>(
+            {{
+                mGravity1.getValue(),
+                mGravity2.getValue()
+            }}
+        )
+    );
 }
 
 void

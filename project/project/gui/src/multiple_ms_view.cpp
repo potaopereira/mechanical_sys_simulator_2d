@@ -96,6 +96,10 @@ mSolversUpdateTimer()
         this, &MultipleMSView::solve
     );
     connect(
+        mGlobalOptions, &GlobalOptions::changeGravity,
+        this, &MultipleMSView::setGravity
+    );
+    connect(
         mGlobalOptions, &GlobalOptions::plotFactorsChanged,
         this, &MultipleMSView::plotFactorsChanged
     );
@@ -256,5 +260,14 @@ void MultipleMSView::plotFactorsChanged(
     for(std::size_t i = 0; i < mList.size(); ++i){
         IMS2D* p = std::get<0>(mList[i]);
         p->setPlotFactors(plot_factors);
+    }
+}
+
+void MultipleMSView::setGravity(
+    std::array<double, 2> const & gravity
+){
+    for(std::size_t i = 0; i < mList.size(); ++i){
+        IMS2D* p = std::get<0>(mList[i]);
+        p->setGravity(gravity);
     }
 }

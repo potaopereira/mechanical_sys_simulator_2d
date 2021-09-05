@@ -113,7 +113,31 @@ public:
     ) = 0;
 
     virtual
+    void showLinearVelocity(
+        int i, // rigid body id
+        bool show
+    ) = 0;
+
+    virtual
+    void showAngularVelocity(
+        int i, // rigid body id
+        bool show
+    ) = 0;
+
+    virtual
     void showForce(
+        int i, // rigid body id
+        bool show
+    ) = 0;
+
+    virtual
+    void showLinearForce(
+        int i, // rigid body id
+        bool show
+    ) = 0;
+
+    virtual
+    void showAngularForce(
         int i, // rigid body id
         bool show
     ) = 0;

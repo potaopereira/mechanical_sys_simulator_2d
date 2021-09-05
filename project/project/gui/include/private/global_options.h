@@ -110,6 +110,8 @@ public slots:
 
     void updatePlotFactors();
 
+    void updateGravity();
+
 signals:
     void startSolver(
         solver_options_t const &
@@ -120,6 +122,10 @@ signals:
         IMS2D::plot_factors_t
     );
 
+    void
+    changeGravity(
+        std::array<double, 2> gravity
+    );
 
 private:
     YAML::Node mNode;
@@ -127,6 +133,8 @@ private:
     GlobalOptionFloat mInitialTime;
     GlobalOptionFloat mFinalTime;
     GlobalOptionFloat mDeltaTime;
+    GlobalOptionFloat mGravity1;
+    GlobalOptionFloat mGravity2;
     GlobalOptionFloat mSetLinearVelocityPlotFactor;
     GlobalOptionFloat mSetAngularVelocityPlotFactor;
     GlobalOptionFloat mSetLinearForcePlotFactor;

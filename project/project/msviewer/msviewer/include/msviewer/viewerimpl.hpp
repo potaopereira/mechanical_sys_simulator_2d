@@ -157,6 +157,32 @@ public:
     }
 
     virtual
+    void showLinearVelocity(
+        int body_id,
+        bool show
+    ){
+        if(body_id < N){
+            if(show)
+                mListOfBodies[body_id]->showLinearVelocity();
+            else
+                mListOfBodies[body_id]->hideLinearVelocity();
+        }
+    }
+
+    virtual
+    void showAngularVelocity(
+        int body_id,
+        bool show
+    ){
+        if(body_id < N){
+            if(show)
+                mListOfBodies[body_id]->showAngularVelocity();
+            else
+                mListOfBodies[body_id]->hideAngularVelocity();
+        }
+    }
+
+    virtual
     void showForce(
         int body_id,
         bool show
@@ -166,6 +192,32 @@ public:
                 mListOfBodies[body_id]->showForce();
             else
                 mListOfBodies[body_id]->hideForce();
+        }
+    }
+
+    virtual
+    void showLinearForce(
+        int body_id,
+        bool show
+    ){
+        if(body_id < N){
+            if(show)
+                mListOfBodies[body_id]->showLinearForce();
+            else
+                mListOfBodies[body_id]->hideLinearForce();
+        }
+    }
+
+    virtual
+    void showAngularForce(
+        int body_id,
+        bool show
+    ){
+        if(body_id < N){
+            if(show)
+                mListOfBodies[body_id]->showAngularForce();
+            else
+                mListOfBodies[body_id]->hideAngularForce();
         }
     }
 

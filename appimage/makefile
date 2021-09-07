@@ -14,9 +14,7 @@ all: install linuxdeploy-x86_64.AppImage
 	export LD_LIBRARY_PATH="$${LD_LIBRARY_PATH}:build/AppDir/usr/lib" \
 	&& \
 	./linuxdeploy-x86_64.AppImage --appdir build/AppDir --output appimage
-	mkdir gui-x86_64.AppImage.home
-
-extra:
+	mkdir -p gui-x86_64.AppImage.home
 	cp build/AppDir/usr/bin/config.yaml gui-x86_64.AppImage.home/
 
 
@@ -42,6 +40,7 @@ compile: build/makefile
 build/makefile: build $(IMAGE)
 	$(call run, \
 	cmake \
+	-DCMAKE_BUILD_TYPE=Release \
 	-DCMAKE_INSTALL_PREFIX=/usr \
 	-S project/project \
 	-B appimage/build \

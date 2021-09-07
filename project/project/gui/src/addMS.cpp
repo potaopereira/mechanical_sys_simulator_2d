@@ -24,6 +24,9 @@
 // SlidingBallsOnSlopesViewer
 #include <SlidingBallsOnSlopes/SlidingBallsOnSlopesViewer.hpp>
 
+// PointOnSuperEllipseViewer
+#include <PointOnSuperEllipse/PointOnSuperEllipseViewer.hpp>
+
 IMS2D*
 MSFactory::create(
     MSType type
@@ -46,6 +49,9 @@ MSFactory::create(
             return new BallsOnSlopesViewer();
         case(MSType::SlidingBallsOnSlopesT):
             return new SlidingBallsOnSlopesViewer();
+
+        case(MSType::PointOnSuperEllipseT):
+            return new PointOnSuperEllipseViewer();
 
         // case(MSType::ExampleMST):
         //     return new ExampleMSViewer();
@@ -93,6 +99,11 @@ AddMS::mList = {
     make_pair(
         std::string("SlidingBallsOnSlopesT"),
         MSFactory::MSType::SlidingBallsOnSlopesT
+    )
+    ,
+    make_pair(
+        std::string("PointOnSuperEllipseT"),
+        MSFactory::MSType::PointOnSuperEllipseT
     )
     // ,
     // make_pair(

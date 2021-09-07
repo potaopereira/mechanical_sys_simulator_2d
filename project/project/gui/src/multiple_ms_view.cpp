@@ -158,13 +158,6 @@ void
 MultipleMSView::changeTime(
     int step
 ){
-    // mSingleMultipleMSView.change(y[value][0]*100, y[value][1]*100, y[value][2], y[value][3], y[value][4], y[value][5], y[value][9], y[value][10], y[value][11]);
-    // pp->setPose(
-    //     Eigen::Matrix<double, (2 + 4), 1>(&(y[value][0]))
-    //     ,
-    //     Eigen::Matrix<double, (3), 1>(&(y[value][2+4+2]))
-    // );
-
     for(std::size_t i = 0; i < mList.size(); ++i){
         std::get<0>(mList[i])->showAtStep(step);
         std::get<2>(mList[i])->set(step);

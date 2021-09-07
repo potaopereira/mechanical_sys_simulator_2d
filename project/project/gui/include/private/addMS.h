@@ -27,7 +27,8 @@ public:
         SlidingBallOnCircleT,
         BarPendulumT,
         BallsOnSlopesT,
-        SlidingBallsOnSlopesT
+        SlidingBallsOnSlopesT,
+        PointOnSuperEllipseT
         // ExampleMST,
         // PendulumT,
         // BallOnParabolaNoSlidingT

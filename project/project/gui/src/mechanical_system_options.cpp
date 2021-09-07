@@ -39,7 +39,7 @@ mRelativePoint(std::array<double, 2>({{0,0}}))
     );
 
     ++k;
-    mQGridLayout.addWidget(new QLabel("position"), k, 0);
+    mQGridLayout.addWidget(new QLabel("Position"), k, 0);
     mShowPosition.setText(QString("Show"));
     mQGridLayout.addWidget(&mShowPosition, k, 1);
     mPosition[0].setToolTip("linear position x in mm");
@@ -57,7 +57,7 @@ mRelativePoint(std::array<double, 2>({{0,0}}))
     showPosition(true);
 
     ++k;
-    mQGridLayout.addWidget(new QLabel("velocity"), k, 0);
+    mQGridLayout.addWidget(new QLabel("Velocity"), k, 0);
     mShowVelocity.setText(QString("All"));
     mQGridLayout.addWidget(&mShowVelocity, k, 1);
     mShowLinearVelocity.setText(QString("Linear"));
@@ -92,7 +92,7 @@ mRelativePoint(std::array<double, 2>({{0,0}}))
 
 
     ++k;
-    mQGridLayout.addWidget(new QLabel("force"), k, 0);
+    mQGridLayout.addWidget(new QLabel("Force"), k, 0);
     mShowForce.setText(QString("All"));
     mQGridLayout.addWidget(&mShowForce, k, 1);
     mShowLinearForce.setText(QString("Linear"));

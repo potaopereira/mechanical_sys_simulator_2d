@@ -12,8 +12,8 @@ MultipleMSView:
       description: final time instant used in simulation
       units: seconds
     delta_time:
-      default: 0.01
-      value: 0.02
+      default: 0.005
+      value: 0.005
       description: time step used in simulation
       units: seconds
   # workspaces:

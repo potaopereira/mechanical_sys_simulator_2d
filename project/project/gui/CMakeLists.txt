@@ -60,6 +60,7 @@ target_link_libraries(${PROJECT_APPLICATION_NAME}
     BarPendulum
     BallsOnSlopes
     SlidingBallsOnSlopes
+    PointOnSuperEllipse
     # ExampleMS
 )
 

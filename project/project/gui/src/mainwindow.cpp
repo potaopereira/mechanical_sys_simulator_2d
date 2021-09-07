@@ -38,23 +38,33 @@ mMultipleMSView(mNode["MultipleMSView"])
 
 YAML::Node
 MainWindow::getConfig(){
+    // try{
+    //     YAML::Node node = YAML::LoadFile("config_tmp.yaml");
+    //     // YAML::Node node = YAML::LoadFile("config.yaml");
+    //     return node;
+    // }
+    // catch(...){
+    //     std::cout << "Using default config." << std::endl;
+    //     return YAML::LoadFile("config.yaml");
+    // }
     try{
-        YAML::Node node = YAML::LoadFile("config_tmp.yaml");
-        // YAML::Node node = YAML::LoadFile("config.yaml");
+        YAML::Node node = YAML::LoadFile( std::string(std::getenv("HOME")) + "/config.yaml");
+        // YAML::Node node = YAML::LoadFile( "config.yaml");
         return node;
     }
     catch(...){
+        YAML::Node node = YAML::LoadFile( std::string(std::getenv("APPDIR")) + "/usr/bin/config.yaml");
         std::cout << "Using default config." << std::endl;
-        return YAML::LoadFile("config.yaml");
+        return node;
     }
-    
 }
 
 MainWindow::~MainWindow()
 {
     mNode["MultipleMSView"] = mMultipleMSView.getNode();
 
-    std::ofstream config_file("config_tmp.yaml");
+    // std::ofstream config_file("config_tmp.yaml");
+    std::ofstream config_file(std::string(std::getenv("HOME")) + "/config.yaml");
     config_file << mNode;
 }
 

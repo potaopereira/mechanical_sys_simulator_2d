@@ -19,7 +19,6 @@ function(add_launch_json _name _program _args _cwd)
     set_property(GLOBAL APPEND PROPERTY _LAUNCHS launch_${name}.json)
 endfunction()
 
-# add_subdirectory(rb2d)
 add_subdirectory(SymbolicC++3-3.35)
 add_subdirectory(msinterface)
 add_subdirectory(msviewer)
@@ -27,10 +26,7 @@ add_subdirectory(mssolver)
 add_subdirectory(examples)
 add_subdirectory(gui)
 add_subdirectory(yaml-cpp)
-# add_subdirectory(minimizer)
-# add_subdirectory(qt_try)
-
-
+add_subdirectory(resources)
 
 
 get_property(LAUNCHS GLOBAL PROPERTY _LAUNCHS)

@@ -10,13 +10,13 @@ BarPendulumSymbImpl(
             {
                 .constraint = &sop::hc_dist2point,
                 .rigid_bodies = std::vector<int>({0}),
-                .parameters = std::vector<Symbolic>({Symbolic("p1[0]"), Symbolic("p1[1]"), -Symbolic("length1_bar"), 0, Symbolic("arm_1_squared")}),
+                .parameters = std::vector<Symbolic>({Symbolic("p1[0]"), Symbolic("p1[1]"), -Symbolic("length1_bar"), 0, Symbolic("arm_1_squared")})
             }
             ,
             {
                 .constraint = &sop::hc_dist2point,
                 .rigid_bodies = std::vector<int>({0}),
-                .parameters = std::vector<Symbolic>({Symbolic("p2[0]"), Symbolic("p2[1]"), +Symbolic("length2_bar"), 0, Symbolic("arm_2_squared")}),
+                .parameters = std::vector<Symbolic>({Symbolic("p2[0]"), Symbolic("p2[1]"), +Symbolic("length2_bar"), 0, Symbolic("arm_2_squared")})
             }
         }}
     )

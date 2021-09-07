@@ -49,13 +49,20 @@ MainWindow::getConfig(){
     // }
     try{
         YAML::Node node = YAML::LoadFile( std::string(std::getenv("HOME")) + "/config.yaml");
-        // YAML::Node node = YAML::LoadFile( "config.yaml");
+        std::cout << "Using config in home." << std::endl;
         return node;
     }
     catch(...){
-        YAML::Node node = YAML::LoadFile( std::string(std::getenv("APPDIR")) + "/usr/bin/config.yaml");
-        std::cout << "Using default config." << std::endl;
-        return node;
+        try{
+            YAML::Node node = YAML::LoadFile( std::string(std::getenv("APPDIR")) + "/usr/bin/config.yaml");
+            std::cout << "Using config in AppDir." << std::endl;
+            return node;
+        }
+        catch(...){
+            YAML::Node node = YAML::LoadFile( "config.yaml");
+            std::cout << "Using config next to application." << std::endl;
+            return node;
+        }
     }
 }
 

@@ -133,6 +133,20 @@ pc_ellipse(
     std::vector<Symbolic> const & parameters = std::vector<Symbolic>({Symbolic("x0"), Symbolic("x1"), Symbolic("a0"), Symbolic("a1")})
 );
 
+Symbolic
+hc_superellipse(
+    std::vector<int> const & rigid_bodies
+    ,
+    std::vector<Symbolic> const & parameters = std::vector<Symbolic>({Symbolic("x0"), Symbolic("x1"), Symbolic("a0"), Symbolic("a1"), Symbolic("alpha")})
+);
+
+Symbolic
+pc_superellipse(
+    lp_t const & lp
+    ,
+    std::vector<Symbolic> const & parameters = std::vector<Symbolic>({Symbolic("x0"), Symbolic("x1"), Symbolic("a0"), Symbolic("a1"), Symbolic("alpha")})
+);
+
 /******************************************************************************/
 
 typedef 
@@ -160,7 +174,7 @@ struct {
 } tuple_holonomic_constraint_with_contact_t;
 
 constraint_with_contact_t
-get_constraint_with_contact(tuple_holonomic_constraint_with_contact_t t);
+get_constraint_with_contact(tuple_holonomic_constraint_with_contact_t const & t);
 
 
 typedef
@@ -171,7 +185,7 @@ struct constraint_with_contact_and_no_slide_s {
 } constraint_with_contact_and_no_slide_t;
 
 constraint_with_contact_and_no_slide_t
-get_constraint_with_contact_and_no_slide(tuple_holonomic_constraint_with_contact_t t);
+get_constraint_with_contact_and_no_slide(tuple_holonomic_constraint_with_contact_t const & t);
 
 // typedef
 // struct constraints_s {
@@ -254,13 +268,13 @@ template<int N>
 std::array<Symbolic, N>
 getdf(
     Symbolic (*function)(
-        std::array<Symbolic, N> const &,
+        std::array<Symbolic, N> const & x,
         std::vector<Symbolic> const & parameters
     )
     ,
-    std::array<Symbolic, N> x
+    std::array<Symbolic, N> const & x
     ,
-    std::vector<Symbolic> parameters
+    std::vector<Symbolic> const &  parameters
 ){
     std::array<Symbolic, N> out;
     Symbolic y("#", N);

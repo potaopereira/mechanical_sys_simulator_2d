@@ -29,7 +29,7 @@ Symbolic get_holonomic_constraint(tuple_holonomic_constraint_t t){
 
 
 constraint_with_contact_t
-get_constraint_with_contact(tuple_holonomic_constraint_with_contact_t t){
+get_constraint_with_contact(tuple_holonomic_constraint_with_contact_t const & t){
 
     p_t p = getP(t.rigid_body);
     lp_t q = getLPContact(t.rigid_body);
@@ -73,7 +73,7 @@ get_constraint_with_contact(tuple_holonomic_constraint_with_contact_t t){
 }
 
 constraint_with_contact_and_no_slide_t
-get_constraint_with_contact_and_no_slide(tuple_holonomic_constraint_with_contact_t t){
+get_constraint_with_contact_and_no_slide(tuple_holonomic_constraint_with_contact_t const & t){
 
     constraint_with_contact_t constraint_with_contact = get_constraint_with_contact(t);
 
@@ -495,6 +495,42 @@ hc_ellipse(
         p_t p = getP(rigid_bodies[0]);
         lp_t lp = p.lp;
         return pc_ellipse(lp, parameters);;
+    }
+}
+
+Symbolic
+pc_superellipse(
+    lp_t const & lp
+    ,
+    std::vector<Symbolic> const & parameters
+){
+    if(parameters.size()!=5){
+        throw std::invalid_argument("Super-ellipse requires 5 parameters: a center point and two axis' lengths.");
+    }
+    else{
+        Symbolic x0 = parameters[0];
+        Symbolic x1 = parameters[1];
+        Symbolic k0 = parameters[2];
+        Symbolic k1 = parameters[3];
+        Symbolic a = parameters[4];
+        // return pow((lp[0] - x0)*k0, a) + pow((lp[1] - x1)*k1, a) - 1;
+        return Symbolic(Power((lp[0] - x0)*k0, a) + Power((lp[1] - x1)*k1, a) - 1);
+    }
+}
+
+Symbolic
+hc_superellipse(
+    std::vector<int> const & rigid_bodies
+    ,
+    std::vector<Symbolic> const & parameters
+){
+    if(rigid_bodies.size()!=1){
+        throw std::invalid_argument("Super-ellipse constraint applies to a single rigid body.");
+    }
+    else{
+        p_t p = getP(rigid_bodies[0]);
+        lp_t lp = p.lp;
+        return pc_superellipse(lp, parameters);;
     }
 }
 

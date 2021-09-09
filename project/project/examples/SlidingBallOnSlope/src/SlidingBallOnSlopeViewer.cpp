@@ -22,11 +22,12 @@ MSVIEW1(
     )
 ),
 IMS2D(this, this, this)
+,
+mSlope(new QGraphicsLineItem())
 {
 
-    QGraphicsLineItem* slope = new QGraphicsLineItem();
-    slope->setLine(0 + 1000*(-1), 0 + 1000*(+getParam("slope")), 0 + 1000*(+1), 0 + 1000*(-getParam("slope")));
-    std::vector<QGraphicsItem*> listOfConstraints = {slope};
+    mSlope->setLine(0 + 1000*(-1), 0 + 1000*(+getParam("slope")), 0 + 1000*(+1), 0 + 1000*(-getParam("slope")));
+    std::vector<QGraphicsItem*> listOfConstraints = {mSlope};
 
     // MSVIEW1::setConstraints
     setConstraints(listOfConstraints);
@@ -59,4 +60,6 @@ SlidingBallOnSlopeViewer::reset(){
             }
         )
     );
+
+    mSlope->setLine(0 + 1000*(-1), 0 + 1000*(+getParam("slope")), 0 + 1000*(+1), 0 + 1000*(-getParam("slope")));
 }

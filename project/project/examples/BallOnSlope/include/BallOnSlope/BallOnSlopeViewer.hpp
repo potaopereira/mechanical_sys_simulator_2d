@@ -19,4 +19,6 @@ public IMS2D // link viewer with solver
 public:
     BallOnSlopeViewer();
     virtual void reset();
+private:
+    QGraphicsLineItem* mSlope;
 };

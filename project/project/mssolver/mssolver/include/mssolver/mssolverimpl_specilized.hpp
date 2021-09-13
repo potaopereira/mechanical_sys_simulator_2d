@@ -173,6 +173,7 @@ public:
         double moment_of_inertia,
         int i // rigid body number
     ) {
+        validateId(i);
         mI(3*i + 2, 3*i + 2) = moment_of_inertia;
         mIinv(3*i + 2, 3*i + 2) = 1./moment_of_inertia;
     }
@@ -559,7 +560,7 @@ public:
      */
     typedef Eigen::Matrix<double, 6*N, 1> ddtp_t;
     /**
-     * @brief Points of contact of the different rigid bodies of the mechanical system
+     * @brief Velocity of the mechanical system
      * 
      */
     typedef Eigen::Matrix<double, 3*N, 1> v_t;
@@ -589,7 +590,7 @@ public:
      */
     typedef Eigen::Matrix<double, 3*N, 1> f_t;
     /**
-     * @brief Number of degress of freedom when choosing the position and the contact points
+     * @brief Number of degress of freedom when choosing the position
      * 
      */
     Eigen::Matrix<double, 3*N - M1, 1> pdof_t;

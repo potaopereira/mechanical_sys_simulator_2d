@@ -26,12 +26,12 @@
 #include <msinterface/exceptions.hpp>
 
 /**
- * @brief Mechanical system is a (3*N - (M1 + M2 + M3))-th dimensional system
+ * @brief Mechanical system is a (3*N - (M1 + M2))-th dimensional system
  * 
  * @tparam N number of rigid bodies
  * @tparam M1 number of holonomic constraints
  * @tparam M2 number of contact contraints
- * @tparam M3 number of non-sliding contact contraints
+ * @tparam M3 number of non-sliding contact contraints -> these do not constraint the position space
  */
 template<int N, int M1, int M2, int M3>
 class MS2DSolverImpl:
@@ -178,6 +178,7 @@ public:
         double moment_of_inertia,
         int i // rigid body number
     ) {
+        validateId(i);
         mI(3*i + 2, 3*i + 2) = moment_of_inertia;
         mIinv(3*i + 2, 3*i + 2) = 1./moment_of_inertia;
     }

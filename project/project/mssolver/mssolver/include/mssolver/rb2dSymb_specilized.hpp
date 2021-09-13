@@ -233,7 +233,7 @@ public:
         for(int i = 0; i < M1; ++i){
             f << "        ";
             for(int j = 0; j < 6*N; ++j){
-                f << d1ck[i][j];
+                f << d1c[i][j];
 
                 if(j!=(6*N-1) || i!=(M1-1))
                     f << ", ";

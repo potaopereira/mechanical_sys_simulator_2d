@@ -96,10 +96,10 @@ get_constraint_with_contact_and_no_slide(tuple_holonomic_constraint_with_contact
         .no_slide_pdot = {
             dconstraint_perp[0],
             dconstraint_perp[1],
-            +dconstraint[1]*q[0],
-            +dconstraint[1]*q[1],
-            -dconstraint[0]*q[0],
-            -dconstraint[0]*q[1]
+            +dconstraint[1]*q[0], // dconstraint_perp[0]*q[0]
+            +dconstraint[1]*q[1], // dconstraint_perp[0]*q[1]
+            -dconstraint[0]*q[0], // dconstraint_perp[1]*q[0]
+            -dconstraint[0]*q[1]  // dconstraint_perp[1]*q[1]
         }
         ,
         .no_slide_v = {
@@ -404,12 +404,12 @@ pc_slope(
         throw std::invalid_argument("Slope requires 4 parameters: a point and a non-zero direction.");
     }
     else{
-        Symbolic x1 = parameters[0];
-        Symbolic x0 = parameters[1];
+        Symbolic x0 = parameters[0];
+        Symbolic x1 = parameters[1];
         Symbolic n0  = parameters[2];
         Symbolic n1  = parameters[3];
 
-        vec_t v1 = {lp[0], lp[1]};
+        vec_t v1 = {lp[0] - x0, lp[1] - x1};
         vec_t v2 = {n0, n1};
         return inner(v1, v2);
     }

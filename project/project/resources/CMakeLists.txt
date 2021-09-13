@@ -4,6 +4,6 @@ install(
 )
 
 install(
-    FILES gui.png
+    FILES gui.svg
     DESTINATION share/icons/hicolor/128x128/apps
 )

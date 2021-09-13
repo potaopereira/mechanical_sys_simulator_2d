@@ -1,0 +1,52 @@
+FROM ubuntu:bionic
+
+RUN apt-get update \
+    && apt-get upgrade -y \
+    && apt-get install checkinstall qtbase5-dev qtbase5-dev-tools -y \
+    && apt-get install libfreetype6-dev libcairo2-dev libjpeg8-dev -y \
+    && apt-get install libpng-dev liblua5.3-dev zlib1g-dev -y \
+    && apt-get install libgsl-dev curl -y
+
+# to use latex
+RUN ln -snf /usr/share/zoneinfo/Etc/UTC /etc/localtime \
+    && echo "Etc/UTC" > /etc/timezone \
+    && apt-get update \
+    && apt-get upgrade -y \
+    && apt-get install texlive-latex-base texlive-latex-extra texlive-fonts-recommended xzdec -y \
+    && rm -rf /var/lib/apt/lists/*
+
+ARG IPEVERSION=7.2.20
+COPY ipe-$IPEVERSION/ home/ipe-$IPEVERSION
+
+RUN cd home/ipe-$IPEVERSION/src \
+    && export QT_SELECT=5 \
+    && make IPEPREFIX=/usr/local \
+    && checkinstall --pkgname=ipe --pkgversion=7.2.20 --backup=no \
+    --fstrans=no --default make install IPEPREFIX=/usr/local \
+    && ldconfig
+
+# user/group
+ARG user
+ARG group
+
+# add user for convenient working with host files
+RUN useradd -mUs /bin/bash ${user} && \
+    usermod -aG sudo ${user} && \
+    usermod -aG dialout ${user} && \
+    echo "${user} ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+
+RUN mkdir /home/wd
+
+USER ${user}:${group}
+
+# https://askubuntu.com/questions/872792/what-is-xdg-runtime-dir
+# "What is XDG_RUNTIME_DIR?", it is an environment variable that is set automatically when you log in. It tells any program you run where to find a user-specific directory in which it can store small temporary files. Note that XDG_RUNTIME_DIR is set by pam_systemd(8), so it is not actually related to X (running programs graphically), which is the problem you seem to be having.
+
+# this is what it defaults to if it is not set
+RUN mkdir /tmp/runtime-${user} && \
+    chown ${user}:${group} /tmp/runtime-${user} && \
+    chmod 7700 /tmp/runtime-${user}
+# chmod 7700 -> drws--S--T
+ENV XDG_RUNTIME_DIR=/tmp/runtime-${user}
+
+WORKDIR /home/wd

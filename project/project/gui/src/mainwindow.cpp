@@ -7,6 +7,12 @@
 // std::cout
 #include <iostream>
 
+// QIcon
+#include <QIcon>
+
+// fromStdString
+#include <QString>
+
 MainWindow::MainWindow(
     QWidget *parent
 ):
@@ -18,6 +24,13 @@ mAddMS()
 ,
 mMultipleMSView(mNode["MultipleMSView"])
 {
+
+    try{
+        setWindowIcon(QIcon(QString::fromStdString(std::string(std::getenv("APPDIR")) + "/gui.svg")));
+    }
+    catch(...){
+        ;
+    }
 
     // You should then add some actions to that menu.
     //  Then you want to add the menu to the tool bar:

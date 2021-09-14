@@ -74,7 +74,7 @@ mList(std::vector<std::tuple<IMS2D*, QScrollArea*, MSOptions*>>({}))
 mSolversUpdateTimer()
 {
     // mQGraphicsScene.setSceneRect(-100, -100, 200, 200);
-    mQGraphicsView.setMinimumWidth(500);
+    mQGraphicsView.setMinimumWidth(700);
     mQGraphicsView.setMinimumHeight(500);
     mQGraphicsView.scale(1,-1);
     mQGraphicsView.setScene(&mQGraphicsScene);
@@ -120,6 +120,8 @@ mSolversUpdateTimer()
     mQGridLayout.addWidget(&mQGraphicsView, 0, 0, 1, 1);
     mQGridLayout.addWidget(&mTimerSlider, 1, 0, 1, 1);
     mQGridLayout.addWidget(&mQTabWidget, 0, 1, 1, 2);
+    // The stretch factor is relative to the other columns in this grid. Columns with a higher stretch factor take more of the available space.
+    mQGridLayout.setColumnStretch(0, 2);
     setLayout(&mQGridLayout);
 
     connect(

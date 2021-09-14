@@ -189,13 +189,13 @@ SlidingBallsOnSlopesSolver::get_d1c(p_t const & p, q_t const & q) const {
     double q11 = q(3);
     d1c_t out;
     out <<
-        2*p00-2*p10, 2*p01-2*p11, 0, -2*p00+2*p10, -2*p01+2*p11, 0, slope_1, 1, p03*q00*slope_1-p02*q01*slope_1+p05*q00-p04*q01, 0, 0, 0, 
-        slope_1, 1, p03*q00*slope_1-p02*q01*slope_1+p05*q00-p04*q01, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
-        0, 0, 0, 0, 0, 0, 0, 0, 2*p03*q00*pow(radius1_1,-2)-2*p02*q01*pow(radius1_2,-2)-2*p05*slope_1*q00*pow(radius1_1,-2)+2*p04*slope_1*q01*pow(radius1_2,-2), 0, 0, 0, 
-        0, 0, 2*p03*q00*pow(radius1_1,-2)-2*p02*q01*pow(radius1_2,-2)-2*p05*slope_1*q00*pow(radius1_1,-2)+2*p04*slope_1*q01*pow(radius1_2,-2), 0, 0, 0, 0, 0, 0, 1, slope_2, p13*q10-p12*q11+p15*q10*slope_2-p14*q11*slope_2, 
-        0, 0, 0, 1, slope_2, p13*q10-p12*q11+p15*q10*slope_2-p14*q11*slope_2, 0, 0, 0, 0, 0, 0, 
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2*p13*slope_2*q10*pow(radius2_1,-2)-2*p12*slope_2*q11*pow(radius2_2,-2)-2*p15*q10*pow(radius2_1,-2)+2*p14*q11*pow(radius2_2,-2), 
-        0, 0, 0, 0, 0, 2*p13*slope_2*q10*pow(radius2_1,-2)-2*p12*slope_2*q11*pow(radius2_2,-2)-2*p15*q10*pow(radius2_1,-2)+2*p14*q11*pow(radius2_2,-2), 2, 0, 0, 0, 0, 0;
+        2*p00-2*p10, 2*p01-2*p11, 0, 0, 0, 0, -2*p00+2*p10, -2*p01+2*p11, 0, 0, 0, 0, 
+        slope_1, 1, q00*slope_1, q01*slope_1, q00, q01, 0, 0, 0, 0, 0, 0, 
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+        0, 0, 2*q00*pow(radius1_1,-2), 2*q01*pow(radius1_2,-2), -2*slope_1*q00*pow(radius1_1,-2), -2*slope_1*q01*pow(radius1_2,-2), 0, 0, 0, 0, 0, 0, 
+        0, 0, 0, 0, 0, 0, 1, slope_2, q10, q11, q10*slope_2, q11*slope_2, 
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+        0, 0, 0, 0, 0, 0, 0, 0, 2*slope_2*q10*pow(radius2_1,-2), 2*slope_2*q11*pow(radius2_2,-2), -2*q10*pow(radius2_1,-2), -2*q11*pow(radius2_2,-2);
     return out;
 }
 

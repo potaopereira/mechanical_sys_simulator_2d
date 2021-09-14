@@ -77,8 +77,8 @@ BarPendulumSolver::get_d1c(p_t const & p) const {
     double p05 = p(5);
     d1c_t out;
     out <<
-        2*p00-2*p02*length1_bar-2*p1[0], 2*p01-2*p04*length1_bar-2*p1[1], -2*p03*p00*length1_bar+2*p03*p02*pow(length1_bar,2)+2*p03*length1_bar*p1[0]-2*p05*p01*length1_bar+2*p05*p04*pow(length1_bar,2)+2*p05*length1_bar*p1[1], 2*p00+2*p02*length2_bar-2*p2[0], 2*p01+2*p04*length2_bar-2*p2[1], 2*p03*p00*length2_bar+2*p03*p02*pow(length2_bar,2)-2*p03*length2_bar*p2[0]+2*p05*p01*length2_bar+2*p05*p04*pow(length2_bar,2)-2*p05*length2_bar*p2[1], 
-        2*p00+2*p02*length2_bar-2*p2[0], 2*p01+2*p04*length2_bar-2*p2[1], 2*p03*p00*length2_bar+2*p03*p02*pow(length2_bar,2)-2*p03*length2_bar*p2[0]+2*p05*p01*length2_bar+2*p05*p04*pow(length2_bar,2)-2*p05*length2_bar*p2[1], 2, 0, -2*length1_bar;
+        2*p00-2*p02*length1_bar-2*p1[0], 2*p01-2*p04*length1_bar-2*p1[1], -2*p00*length1_bar+2*p02*pow(length1_bar,2)+2*length1_bar*p1[0], 0, -2*p01*length1_bar+2*p04*pow(length1_bar,2)+2*length1_bar*p1[1], 0, 
+        2*p00+2*p02*length2_bar-2*p2[0], 2*p01+2*p04*length2_bar-2*p2[1], 2*p00*length2_bar+2*p02*pow(length2_bar,2)-2*length2_bar*p2[0], 0, 2*p01*length2_bar+2*p04*pow(length2_bar,2)-2*length2_bar*p2[1], 0;
     return out;
 }
 

@@ -114,10 +114,10 @@ BallOnSlopeSolver::get_d1c(p_t const & p, q_t const & q) const {
     double q01 = q(1);
     d1c_t out;
     out <<
-        slope, 1, p03*q00*slope-p02*q01*slope+p05*q00-p04*q01, 0, 0, 0, 
-        0, 0, 0, 0, 0, 2*p03*q00*pow(radius1,-2)-2*p03*offset1*pow(radius1,-2)-2*p02*q01*pow(radius2,-2)+2*p02*offset2*pow(radius2,-2)-2*p05*slope*q00*pow(radius1,-2)+2*p05*slope*offset1*pow(radius1,-2)+2*p04*slope*q01*pow(radius2,-2)-2*p04*slope*offset2*pow(radius2,-2), 
-        0, 0, 2*p03*q00*pow(radius1,-2)-2*p03*offset1*pow(radius1,-2)-2*p02*q01*pow(radius2,-2)+2*p02*offset2*pow(radius2,-2)-2*p05*slope*q00*pow(radius1,-2)+2*p05*slope*offset1*pow(radius1,-2)+2*p04*slope*q01*pow(radius2,-2)-2*p04*slope*offset2*pow(radius2,-2), 1, -slope, -p02*q01+p03*q00+slope*p04*q01-slope*p05*q00, 
-        1, -slope, -p02*q01+p03*q00+slope*p04*q01-slope*p05*q00, 0, 0, 0;
+        slope, 1, q00*slope, q01*slope, q00, q01, 
+        0, 0, 0, 0, 0, 0, 
+        0, 0, 2*q00*pow(radius1,-2)-2*offset1*pow(radius1,-2), 2*q01*pow(radius2,-2)-2*offset2*pow(radius2,-2), -2*slope*q00*pow(radius1,-2)+2*slope*offset1*pow(radius1,-2), -2*slope*q01*pow(radius2,-2)+2*slope*offset2*pow(radius2,-2), 
+        1, -slope, q00, q01, -slope*q00, -slope*q01;
     return out;
 }
 

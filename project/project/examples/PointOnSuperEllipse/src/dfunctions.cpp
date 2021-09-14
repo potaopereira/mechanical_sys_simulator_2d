@@ -73,7 +73,7 @@ PointOnSuperEllipseSolver::get_d1c(p_t const & p) const {
     double p05 = p(5);
     d1c_t out;
     out <<
-        outside_alpha*pow(p00,outside_alpha-1)*pow(outside_rinv,outside_alpha), outside_alpha*pow(p01,outside_alpha-1)*pow(outside_rinv,outside_alpha), 0, pow(outside_alpha,2)*pow(p00,outside_alpha-2)*pow(outside_rinv,outside_alpha)-outside_alpha*pow(p00,outside_alpha-2)*pow(outside_rinv,outside_alpha), 0, 0;
+        outside_alpha*pow(p00,outside_alpha-1)*pow(outside_rinv,outside_alpha), outside_alpha*pow(p01,outside_alpha-1)*pow(outside_rinv,outside_alpha), 0, 0, 0, 0;
     return out;
 }
 

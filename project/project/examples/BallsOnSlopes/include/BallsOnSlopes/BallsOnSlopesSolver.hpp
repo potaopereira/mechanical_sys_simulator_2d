@@ -1,3 +1,14 @@
+/**
+ * @file BallsOnSlopesSolver.hpp
+ * @author Pedro Pereira (pedro.m.otao.pereira@gmail.com)
+ * @brief Solver for balls on slope mechanical system
+ * @details \image html images/balls_on_slopes.gif
+ * @version 0.1
+ * @date 2021
+ * 
+ * @copyright Copyright (c) 2021
+ * 
+ */
 #pragma once
 
 // BallsOnSlopesSymb
@@ -6,8 +17,18 @@
 // MS2DSolverImpl
 #include <mssolver/mssolverimpl.hpp>
 
+/**
+ * @brief A balls-on-slopes mechanical system is composed of 2 rigid bodies with 2 non sliding constraints
+ * 
+ */
 typedef MS2DSolverImpl<2, 1, 2, 2> BallsOnSlopesSolverImpl;
 
+/**
+ * @brief Class that solves the ODE of balls on slopes
+ * 
+ * @details A balls-on-slopes mechanical system is composed of 2 rigid bodies with 2 non sliding constraints
+ * \image html images/balls_on_slopes.gif
+ */
 class BallsOnSlopesSolver:
 public BallsOnSlopesSymb,
 public BallsOnSlopesSolverImpl

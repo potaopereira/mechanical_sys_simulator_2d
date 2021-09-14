@@ -1,3 +1,14 @@
+/**
+ * @file SlidingBallOnSlopeSolver.hpp
+ * @author Pedro Pereira (pedro.m.otao.pereira@gmail.com)
+ * @brief Solver for a sliding ball on a slope
+ * @details \image html images/ball_vs_ellipse_on_slope.gif
+ * @version 0.1
+ * @date 2021
+ * 
+ * @copyright Copyright (c) 2021
+ * 
+ */
 #pragma once
 
 // SlidingBallOnSlopeSymb
@@ -6,8 +17,18 @@
 // MS2DSolverImpl
 #include <mssolver/mssolverimpl.hpp>
 
+/**
+ * @brief A sliding ball on a slope is a mechanical system composed of 1 rigid body and 1 sliding constraint
+ * 
+ */
 typedef MS2DSolverImpl<1, 0, 1, 0> SlidingBallOnSlopeSolverImpl;
 
+/**
+ * @brief Class that solves the ODE of a sliding ball on a slope
+ * 
+ * @details A sliding ball on a slope is a mechanical system composed of 1 rigid body and 1 sliding constraint
+ * \image html images/ball_vs_ellipse_on_slope.gif
+ */
 class SlidingBallOnSlopeSolver:
 public SlidingBallOnSlopeSymb,
 public SlidingBallOnSlopeSolverImpl

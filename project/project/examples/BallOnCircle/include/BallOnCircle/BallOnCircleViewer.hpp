@@ -1,3 +1,14 @@
+/**
+ * @file BallOnCircleViewer.hpp
+ * @author Pedro Pereira (pedro.m.otao.pereira@gmail.com)
+ * @brief Viewer for a non sliding ball on a circle
+ * @details \image html images/ellipse_on_ellipse.gif
+ * @version 0.1
+ * @date 2021
+ * 
+ * @copyright Copyright (c) 2021
+ * 
+ */
 #pragma once
 
 // BallOnCircleSolver
@@ -9,8 +20,19 @@
 // MSView<N>
 #include <msviewer/viewerimpl.hpp>
 
+
+/**
+ * @brief A non sliding ball on a circle is a mechanical system with 1 rigid body
+ * 
+ */
 typedef MSView<1> MSVIEW1;
 
+/**
+ * @brief Class that shows visually a non sliding ball on a circle
+ * 
+ * @details A non sliding ball on a circle is a mechanical system with 1 rigid body and 1 non-sliding constraint
+ * \image html images/ellipse_on_ellipse.gif
+ */
 class BallOnCircleViewer:
 public BallOnCircleSolver, // this is the solver
 public MSVIEW1, // this is the viewer

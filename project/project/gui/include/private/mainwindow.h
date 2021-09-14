@@ -3,7 +3,7 @@
  * @author Pedro Pereira (pedro.m.otao.pereira@gmail.com)
  * @brief Main window of gui
  * @version 0.1
- * @date 2021-08-28
+ * @date 2021
  * 
  * @copyright Copyright (c) 2021
  * 
@@ -26,6 +26,10 @@
 // YAML::Node
 #include <yaml-cpp/yaml.h>
 
+/**
+ * @brief Main window of the gui application
+ * 
+ */
 class MainWindow:
 public QMainWindow
 {

@@ -3,7 +3,7 @@
  * @author Pedro Pereira (pedro.m.otao.pereira@gmail.com)
  * @brief Custom slider widget (to drag from initial time instant to final time instant)
  * @version 0.1
- * @date 2021-09-01
+ * @date 2021
  * 
  * @copyright Copyright (c) 2021
  * 
@@ -18,6 +18,10 @@
 #include <QProgressBar>
 #include <QPushButton>
 
+/**
+ * @brief Slider where we can select the time instant at which we wish to visualize the mechanical system
+ * 
+ */
 class TimerSlider: public QWidget
 {
     Q_OBJECT

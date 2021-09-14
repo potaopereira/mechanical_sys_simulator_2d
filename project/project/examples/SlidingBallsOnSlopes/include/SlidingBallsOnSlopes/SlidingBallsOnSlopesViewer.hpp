@@ -1,4 +1,13 @@
-#pragma once
+/**
+ * @file SlidingBallsOnSlopesViewer.hpp
+ * @author Pedro Pereira (pedro.m.otao.pereira@gmail.com)
+ * @brief Viewer for sliding balls on slopes mechanical system
+ * @version 0.1
+ * @date 2021
+ * 
+ * @copyright Copyright (c) 2021
+ * 
+ */
 
 // SlidingBallsOnSlopesSolver
 #include "SlidingBallsOnSlopes/SlidingBallsOnSlopesSolver.hpp"
@@ -9,8 +18,17 @@
 // MSView<N>
 #include <msviewer/viewerimpl.hpp>
 
+/**
+ * @brief A sliding-balls-on-slopes mechanical system is composed of 2 rigid bodies with 2 sliding constraints
+ * 
+ */
 typedef MSView<2> MSVIEW2;
 
+/**
+ * @brief Class that shows visually sliding balls on slopes
+ * 
+ * @details A sliding-balls-on-slopes mechanical system is composed of 2 rigid bodies with 2 sliding constraints
+ */
 class SlidingBallsOnSlopesViewer:
 public SlidingBallsOnSlopesSolver, // this is the solver
 public MSVIEW2, // this is the viewer

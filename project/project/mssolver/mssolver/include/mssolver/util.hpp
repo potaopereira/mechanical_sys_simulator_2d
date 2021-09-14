@@ -17,6 +17,10 @@ typedef std::array<Symbolic, 2> lp_t;
 
 typedef std::array<std::array<Symbolic, 2>, 2> ap_t;
 
+/**
+ * @brief A pose is composed of a linear position and an angular position
+ * 
+ */
 typedef
 struct psym_s {
     lp_t lp;
@@ -41,6 +45,10 @@ Symbolic
     std::vector<Symbolic> const & parameters
 );
 
+/**
+ * @brief A holonomic constraint is composed of a function (that defines the contraint), plus the rigid bodies involved, plus parameters
+ * 
+ */
 typedef
 struct {
     holonomic_constraint_t constraint;
@@ -149,11 +157,15 @@ pc_superellipse(
 
 /******************************************************************************/
 
-typedef 
-struct constraint_without_contact_s {
-    Symbolic constraint;
-} constraint_without_contact_t;
+// typedef 
+// struct constraint_without_contact_s {
+//     Symbolic constraint;
+// } constraint_without_contact_t;
 
+/**
+ * @brief A contact constraint is composed of a constraint (where the contact point must lie), the boundary of the rigid body, and the normal to the consttraint surface
+ * 
+ */
 typedef
 struct constraint_with_contact_s {
     int i;
@@ -163,6 +175,10 @@ struct constraint_with_contact_s {
 } constraint_with_contact_t;
 
 
+/**
+ * @brief A contact constraint is composed of the constraint function, the boundary function and the rigid body which the constraint applies to
+ * 
+ */
 typedef
 struct {
     int rigid_body;
@@ -176,7 +192,10 @@ struct {
 constraint_with_contact_t
 get_constraint_with_contact(tuple_holonomic_constraint_with_contact_t const & t);
 
-
+/**
+ * @brief A sliding constraint is compose of a non-sliding constraint plus the zero velocity condition at the contact point
+ * 
+ */
 typedef
 struct constraint_with_contact_and_no_slide_s {
     constraint_with_contact_t constraint_with_contact;

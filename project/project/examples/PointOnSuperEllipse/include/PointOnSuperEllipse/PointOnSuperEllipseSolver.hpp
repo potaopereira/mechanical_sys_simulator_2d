@@ -1,3 +1,14 @@
+/**
+ * @file PointOnSuperEllipseSolver.hpp
+ * @author Pedro Pereira (pedro.m.otao.pereira@gmail.com)
+ * @brief Solver for point on super-ellipse mechanical system
+ * @details \image html images/point_on_superellipse.gif
+ * @version 0.1
+ * @date 2021
+ * 
+ * @copyright Copyright (c) 2021
+ * 
+ */
 #pragma once
 
 // PointOnSuperEllipseSymb
@@ -6,8 +17,18 @@
 // MS2DHOLSolverImpl
 #include <mssolver/mssolverimpl_specilized.hpp>
 
+/**
+ * @brief A point on super-ellipse mechanical system is composed of 1 rigid body and 1 non-sliding constraint
+ * 
+ */
 typedef MS2DHOLSolverImpl<1, 1> PointOnSuperEllipseSolverImpl;
 
+/**
+ * @brief Class that solves the ODE of a point on a super-ellipse
+ * 
+ * @details A point on super-ellipse mechanical system is composed of 1 rigid body and 1 non-sliding constraint
+ * \image html images/point_on_superellipse.gif
+ */
 class PointOnSuperEllipseSolver:
 public PointOnSuperEllipseSymb,
 public PointOnSuperEllipseSolverImpl

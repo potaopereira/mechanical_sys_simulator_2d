@@ -3,7 +3,7 @@
  * @author Pedro Pereira (pedro.m.otao.pereira@gmail.com)
  * @brief Widget to set global options
  * @version 0.1
- * @date 2021-08-28
+ * @date 2021
  * 
  * @copyright Copyright (c) 2021
  * 
@@ -30,6 +30,10 @@
 // YAML::Node
 #include <yaml-cpp/yaml.h>
 
+/**
+ * @brief Widget to floating point parameter
+ * 
+ */
 class GlobalOptionFloat:
 public QWidget
 {
@@ -54,6 +58,10 @@ private:
     float mMax;
 };
 
+/**
+ * @brief Widget to set integer parameter
+ * 
+ */
 class GlobalOptionInt:
 public QWidget
 {
@@ -78,6 +86,10 @@ private:
     int mMax;
 };
 
+/**
+ * @brief Widget to set global options, e.g., the time step in the simulation
+ * 
+ */
 class GlobalOptions:
 public QWidget
 {

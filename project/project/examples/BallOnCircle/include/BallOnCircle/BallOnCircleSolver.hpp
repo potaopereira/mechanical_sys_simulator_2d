@@ -1,3 +1,15 @@
+/**
+ * @file BallOnCircleSolver.hpp
+ * @author Pedro Pereira (pedro.m.otao.pereira@gmail.com)
+ * @brief Solver for non sliding ball on a circle
+ * @details \image html images/ellipse_on_ellipse.gif
+ * @version 0.1
+ * @date 2021
+ * 
+ * @copyright Copyright (c) 2021
+ * 
+ */
+
 #pragma once
 
 // BallOnCircleSymb
@@ -6,8 +18,18 @@
 // MS2DSolverImpl
 #include <mssolver/mssolverimpl.hpp>
 
+/**
+ * @brief A non sliding ball on a circle is a mechanical system with 1 rigid body and 1 non-sliding constraint
+ * 
+ */
 typedef MS2DSolverImpl<1, 0, 1, 1> BallOnCircleSolverImpl;
 
+/**
+ * @brief Class that solves the ODE of a non sliding ball on a circle
+ * 
+ * @details A non sliding ball on a circle is a mechanical system with 1 rigid body and 1 non-sliding constraint
+ * \image html images/ellipse_on_ellipse.gif
+ */
 class BallOnCircleSolver:
 public BallOnCircleSymb,
 public BallOnCircleSolverImpl

@@ -1,3 +1,13 @@
+/**
+ * @file exceptions.hpp
+ * @author Pedro Pereira (pedro.m.otao.pereira@gmail.com)
+ * @brief 
+ * @version 0.1
+ * @date 2021
+ * 
+ * @copyright Copyright (c) 2021
+ * 
+ */
 #pragma once
 
 #include <exception>

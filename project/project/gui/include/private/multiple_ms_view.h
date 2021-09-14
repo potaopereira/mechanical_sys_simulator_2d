@@ -3,7 +3,7 @@
  * @author Pedro Pereira (pedro.m.otao.pereira@gmail.com)
  * @brief Widget to visualize several mechanical systems
  * @version 0.1
- * @date 2021-09-01
+ * @date 2021
  * 
  * @copyright Copyright (c) 2021
  * 
@@ -37,6 +37,10 @@
 // QGraphicsView
 #include <QGraphicsView>
 
+/**
+ * @brief Graphics view where we can zoom in and out using the mouse
+ * 
+ */
 class AdaptableQGraphicsView:
 public QGraphicsView
 {
@@ -64,6 +68,10 @@ private:
     double mScaleInv;
 };
 
+/**
+ * @brief Widget to show all mechanical systems
+ * 
+ */
 class MultipleMSView:
 public QWidget
 {

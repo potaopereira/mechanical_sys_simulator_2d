@@ -3,7 +3,7 @@
  * @author Pedro Pereira (pedro.m.otao.pereira@gmail.com)
  * @brief Widget to select mechanical system options
  * @version 0.1
- * @date 2021-08-28
+ * @date 2021
  * 
  * @copyright Copyright (c) 2021
  * 
@@ -32,6 +32,10 @@
 // IMS2D
 #include <msinterface/interface.hpp>
 
+/**
+ * @brief Widget to select rigid body options of a single rigid body
+ * 
+ */
 class RBOptions:
 public QGroupBox
 {
@@ -137,7 +141,10 @@ private:
     ColorButton mColorButton;
 };
 
-
+/**
+ * @brief Widget to select parameters of the mechanical system
+ * 
+ */
 class MSParameters:
 public QGroupBox
 {
@@ -164,6 +171,10 @@ private:
     std::map<std::string, QLineEdit*> mParamLE;
 };
 
+/**
+ * @brief Widget to holds the widgets for each rigid body of the mechanical system, plus the widget to set the parameters for the same system
+ * 
+ */
 class MSOptions:
 public QWidget
 {

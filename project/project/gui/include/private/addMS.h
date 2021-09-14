@@ -3,7 +3,7 @@
  * @author Pedro Pereira (pedro.m.otao.pereira@gmail.com)
  * @brief Menu to add a mechanical system
  * @version 0.1
- * @date 2021-08-28
+ * @date 2021
  * 
  * @copyright Copyright (c) 2021
  * 
@@ -18,6 +18,10 @@
 // IMS2D
 #include <msinterface/interface.hpp>
 
+/**
+ * @brief Factory of mechanical systems
+ * 
+ */
 class MSFactory {
 public:
     enum class MSType {
@@ -40,6 +44,10 @@ public:
     );
 };
 
+/**
+ * @brief Menu on gui where user selects which mechanical system he wants to add to the simulation
+ * 
+ */
 class AddMS:
 public QMenu
 {

@@ -1,3 +1,14 @@
+/**
+ * @file BarPendulumSolver.hpp
+ * @author Pedro Pereira (pedro.m.otao.pereira@gmail.com)
+ * @brief Solver for bar pendulum mechanical system
+ * @details \image html images/bar_pendulum.gif
+ * @version 0.1
+ * @date 2021
+ * 
+ * @copyright Copyright (c) 2021
+ * 
+ */
 #pragma once
 
 // BarPendulumSymb
@@ -6,8 +17,18 @@
 // MS2DHOLSolverImpl
 #include <mssolver/mssolverimpl_specilized.hpp>
 
+/**
+ * @brief A bar pendulum mechanical system is composed of 1 rigid body and two holonomic constraints
+ * 
+ */
 typedef MS2DHOLSolverImpl<1, 2> BarPendulumSolverImpl;
 
+/**
+ * @brief Class that solves the ODE of a bar pendulum
+ * 
+ * @details A bar pendulum mechanical system is composed of 1 rigid body and two holonomic constraints
+ * \image html images/bar_pendulum.gif
+ */
 class BarPendulumSolver:
 public BarPendulumSymb,
 public BarPendulumSolverImpl

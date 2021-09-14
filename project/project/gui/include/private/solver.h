@@ -4,7 +4,7 @@
  * @brief The solver for each mechanical system runs in a separate thread
  * @details When solving several mechanical systems, they are all started simultaneously, and a single timer provides the minimum progress of all the solvers
  * @version 0.1
- * @date 2021-09-01
+ * @date 2021
  * 
  * @copyright Copyright (c) 2021
  * 
@@ -27,6 +27,10 @@
 // std::vector
 #include <vector>
 
+/**
+ * @brief Thread to solve the ODE of a mechanical system
+ * 
+ */
 class SolverThread:
 public QThread
 {
@@ -62,6 +66,10 @@ private:
     QTimer mQTimer;
 };
 
+/**
+ * @brief Timer used to check the progress of the solving of the ODEs of all the mechanical systems
+ * 
+ */
 class SolversUpdateTimer:
 public QTimer
 {

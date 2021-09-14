@@ -11,9 +11,9 @@ start: .create $(BUILD)
 	-it \
 	$(CONTAINER) \
 	/bin/zsh -c " \
-	cd project/project/$(BUILD) \
+	cd project/project/build/gui \
 	&& \
-	pwd \
+	./gui \
 	"
 
 inspect: .create
